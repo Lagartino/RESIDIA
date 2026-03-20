@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ResidIA – Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f7f6f3;--surface:#ffffff;--surface2:#f0efe9;
+  --text:#1a1a1a;--text2:#6b6b6b;--text3:#aaaaaa;
+  --border:rgba(0,0,0,0.1);--border2:rgba(0,0,0,0.2);
+  --green:#085041;--green-mid:#1D9E75;--green-pale:#E1F5EE;--green-soft:#9FE1CB;--green-text:#0F6E56;
+  --amber:#FAEEDA;--amber-text:#854F0B;--amber-dk:#633806;
+  --red:#FCEBEB;--red-text:#A32D2D;
+  --blue:#E6F1FB;--blue-text:#185FA5;
+  --purple:#EEEDFE;--purple-text:#534AB7;
+  --r:8px;--r-lg:12px;
+}
+body{font-family:'DM Sans',sans-serif;color:var(--text);background:var(--bg);display:flex;min-height:100vh;font-size:14px}
+
+.sidebar{width:210px;background:var(--surface);border-right:0.5px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sb-logo{padding:1.25rem 1.25rem 0.75rem;font-family:'Playfair Display',serif;font-size:18px;font-weight:500;border-bottom:0.5px solid var(--border);margin-bottom:0.5rem}
+.sb-logo span{color:var(--green-mid)}
+.sb-user{display:flex;align-items:center;gap:10px;padding:0.75rem 1.25rem;margin-bottom:0.5rem}
+.sb-avatar{width:32px;height:32px;border-radius:50%;background:var(--green-soft);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:var(--green-text);flex-shrink:0}
+.sb-name{font-size:12px;font-weight:500;line-height:1.3}
+.sb-country{font-size:11px;color:var(--text2)}
+.sb-section{font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--text3);padding:0.5rem 1.25rem 0.25rem;font-weight:500}
+.sb-item{display:flex;align-items:center;gap:10px;padding:0.55rem 1.25rem;cursor:pointer;font-size:13px;color:var(--text2);transition:all 0.15s;border-left:2px solid transparent}
+.sb-item:hover{color:var(--text);background:var(--bg)}
+.sb-item.active{color:var(--green);background:var(--green-pale);border-left:2px solid var(--green-mid);font-weight:500}
+.sb-icon{width:16px;text-align:center;font-size:14px;flex-shrink:0}
+.sb-badge{margin-left:auto;font-size:10px;background:var(--amber);color:var(--amber-text);padding:2px 7px;border-radius:20px}
+.sb-footer{margin-top:auto;padding:1rem 1.25rem;border-top:0.5px solid var(--border);font-size:11px;color:var(--text3)}
+
+.main{flex:1;overflow-y:auto;min-width:0}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:1rem 2rem;background:var(--surface);border-bottom:0.5px solid var(--border);position:sticky;top:0;z-index:10}
+.topbar-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:500}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.notif-btn{width:34px;height:34px;border-radius:var(--r);border:0.5px solid var(--border2);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;position:relative}
+.notif-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:#E24B4A;border:1.5px solid var(--surface)}
+.add-btn{padding:7px 16px;background:var(--green);color:var(--green-pale);border:none;border-radius:var(--r);cursor:pointer;font-size:12px;font-weight:500}
+.page{display:none;padding:1.75rem 2rem}
+.page.active{display:block}
+
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem}
+.kpi{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--r-lg);padding:1rem 1.1rem}
+.kpi-label{font-size:11px;color:var(--text2);margin-bottom:6px}
+.kpi-val{font-size:22px;font-weight:500;line-height:1}
+.kpi-sub{font-size:11px;margin-top:5px}
+.kpi-sub.up{color:var(--green-mid)}.kpi-sub.warn{color:var(--amber-text)}.kpi-sub.danger{color:var(--red-text)}
+
+.section-title{font-size:13px;font-weight:500;margin-bottom:1rem}
+.card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--r-lg);padding:1.25rem;margin-bottom:1rem}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.card-title{font-size:13px;font-weight:500}
+
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;padding:8px 12px;font-size:10px;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3);font-weight:500;border-bottom:0.5px solid var(--border)}
+td{padding:10px 12px;border-bottom:0.5px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--bg)}
+
+.badge{display:inline-block;font-size:10px;padding:3px 8px;border-radius:20px;font-weight:500}
+.badge-green{background:var(--green-pale);color:var(--green-text)}
+.badge-amber{background:var(--amber);color:var(--amber-text)}
+.badge-red{background:var(--red);color:var(--red-text)}
+.badge-blue{background:var(--blue);color:var(--blue-text)}
+.badge-purple{background:var(--purple);color:var(--purple-text)}
+.badge-gray{background:var(--surface2);color:var(--text2)}
+
+.alert{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-radius:var(--r);margin-bottom:8px;font-size:12px}
+.alert-warn{background:var(--amber);color:var(--amber-dk)}
+.alert-info{background:var(--blue);color:var(--blue-text)}
+.alert-ok{background:var(--green-pale);color:var(--green-text)}
+.alert-icon{font-size:14px;flex-shrink:0;margin-top:1px}
+.alert strong{font-weight:500;display:block;margin-bottom:2px}
+
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem}
+
+.prop-card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--r-lg);overflow:hidden;cursor:pointer;transition:border-color 0.15s}
+.prop-card:hover{border-color:var(--border2)}
+.prop-card.selected{border:1.5px solid var(--green-mid)}
+.prop-img{height:110px;display:flex;align-items:center;justify-content:center;font-size:36px}
+.prop-body{padding:0.9rem}
+.prop-name{font-size:13px;font-weight:500;margin-bottom:3px}
+.prop-addr{font-size:11px;color:var(--text2);margin-bottom:8px}
+.prop-row{display:flex;justify-content:space-between;align-items:center}
+.prop-stat{font-size:11px;color:var(--text2)}
+.prop-stat strong{color:var(--text);font-size:12px}
+
+.ficha{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--r-lg);padding:1.25rem}
+.ficha-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1rem;padding-bottom:1rem;border-bottom:0.5px solid var(--border)}
+.ficha-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:500}
+.ficha-sub{font-size:12px;color:var(--text2);margin-top:3px}
+.detail-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0}
+.detail-item{padding:10px 0;border-bottom:0.5px solid var(--border);padding-right:1rem}
+.detail-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:3px}
+.detail-val{font-size:13px;font-weight:500}
+
+.cal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+.cal-item{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--r-lg);padding:1rem}
+.cal-month{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:6px}
+.cal-desc{font-size:12px;font-weight:500;margin-bottom:4px}
+.cal-detail{font-size:11px;color:var(--text2)}
+.cal-item.urgent{border-left:3px solid #E24B4A}
+.cal-item.soon{border-left:3px solid #EF9F27}
+.cal-item.ok{border-left:3px solid var(--green-mid)}
+.cal-item.done{opacity:0.5}
+
+.calc-form{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-label{font-size:11px;color:var(--text2);font-weight:500}
+.form-input{padding:8px 10px;border:0.5px solid var(--border2);border-radius:var(--r);font-size:13px;font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--text)}
+.form-input:focus{outline:none;border-color:var(--green-mid)}
+select.form-input{cursor:pointer}
+.calc-result{background:var(--green-pale);border:0.5px solid var(--green-soft);border-radius:var(--r-lg);padding:1.25rem;margin-top:1rem}
+.calc-result-title{font-size:11px;color:var(--green-text);text-transform:uppercase;letter-spacing:1px;margin-bottom:0.75rem}
+.calc-result-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem}
+.r-label{font-size:10px;color:var(--green-text);margin-bottom:3px}
+.r-val{font-size:20px;font-weight:500;color:var(--green)}
+
+.alq-tabs{display:flex;gap:4px;margin-bottom:1rem;background:var(--surface2);padding:4px;border-radius:var(--r);display:inline-flex}
+.alq-tab{padding:5px 14px;border-radius:6px;font-size:12px;cursor:pointer;color:var(--text2);border:none;background:transparent;font-family:'DM Sans',sans-serif}
+.alq-tab.active{background:var(--surface);color:var(--text);font-weight:500;box-shadow:0 1px 3px rgba(0,0,0,0.08)}
+
+.rental-summary{display:grid;grid-template-columns:repeat(5,1fr);gap:0.75rem;margin-bottom:1rem}
+.rs-item{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--r);padding:0.8rem 1rem}
+.rs-label{font-size:10px;color:var(--text2);margin-bottom:4px}
+.rs-val{font-size:16px;font-weight:500}
+.rs-sub{font-size:10px;color:var(--text3);margin-top:2px}
+
+.prog-wrap{background:var(--surface2);border-radius:4px;height:6px;overflow:hidden;margin-top:4px}
+.prog-bar{height:100%;border-radius:4px;background:var(--green-mid)}
+
+.btn{padding:7px 14px;border-radius:var(--r);cursor:pointer;font-size:12px;font-weight:500;font-family:'DM Sans',sans-serif;border:0.5px solid var(--border2);background:transparent;color:var(--text);transition:background 0.15s}
+.btn:hover{background:var(--bg)}
+.btn-green{background:var(--green);color:var(--green-pale);border:none}
+.btn-green:hover{opacity:0.85}
+.btn-sm{padding:5px 10px;font-size:11px}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sb-logo">Resid<span>IA</span></div>
+  <div class="sb-user">
+    <div class="sb-avatar">JH</div>
+    <div>
+      <div class="sb-name">Johan Henriksson</div>
+      <div class="sb-country">🇸🇪 Residente en Suecia</div>
+    </div>
+  </div>
+  <div class="sb-section">Principal</div>
+  <div class="sb-item active" onclick="nav('resumen',this)"><span class="sb-icon">📊</span> Resumen</div>
+  <div class="sb-item" onclick="nav('inmuebles',this)"><span class="sb-icon">🏠</span> Mis inmuebles</div>
+  <div class="sb-item" onclick="nav('alquileres',this)"><span class="sb-icon">🔑</span> Alquileres</div>
+  <div class="sb-section">Fiscal</div>
+  <div class="sb-item" onclick="nav('tributos',this)"><span class="sb-icon">📋</span> Obligaciones <span class="sb-badge">2</span></div>
+  <div class="sb-item" onclick="nav('documentos',this)"><span class="sb-icon">🗂️</span> Documentos</div>
+  <div class="sb-footer">ResidIA v1.0 · Plan Propietario<br/>Asesor: García &amp; Asociados</div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="page-title">Resumen</div>
+    <div class="topbar-right">
+      <button class="notif-btn">🔔<span class="notif-dot"></span></button>
+      <button class="add-btn">+ Añadir inmueble</button>
+    </div>
+  </div>
+
+  <!-- RESUMEN -->
+  <div class="page active" id="page-resumen">
+    <div class="kpi-grid">
+      <div class="kpi"><div class="kpi-label">Renta bruta anual</div><div class="kpi-val">18.400 €</div><div class="kpi-sub up">↑ +8% vs 2023</div></div>
+      <div class="kpi"><div class="kpi-label">Gastos anuales</div><div class="kpi-val">4.210 €</div><div class="kpi-sub warn">IBI, comunidad, seguros</div></div>
+      <div class="kpi"><div class="kpi-label">Rendimiento neto</div><div class="kpi-val">14.190 €</div><div class="kpi-sub up">Yield neto: 4,8%</div></div>
+      <div class="kpi"><div class="kpi-label">IRNR pendiente</div><div class="kpi-val">1.230 €</div><div class="kpi-sub danger">Vence en 47 días</div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Alertas activas</span><span class="badge badge-amber">3 pendientes</span></div>
+      <div class="alert alert-warn"><span class="alert-icon">⏰</span><div><strong>Modelo 210 – T3 2024</strong>Plazo: 20 enero 2025. Inmueble: Apto. Estepona.</div><button class="btn btn-sm" style="margin-left:auto;flex-shrink:0" onclick="nav('tributos',document.querySelectorAll('.sb-item')[3])">Gestionar</button></div>
+      <div class="alert alert-warn"><span class="alert-icon">📄</span><div><strong>Contrato por vencer</strong>Lars Svensson · Local Marbella · Vence 28 feb 2025.</div><button class="btn btn-sm" style="margin-left:auto;flex-shrink:0" onclick="nav('alquileres',document.querySelectorAll('.sb-item')[2])">Ver contrato</button></div>
+      <div class="alert alert-info"><span class="alert-icon">📬</span><div><strong>Documento requerido por tu gestor</strong>García &amp; Asociados solicita el recibo del IBI 2024 del Apto. Estepona.</div></div>
+    </div>
+    <div class="two-col">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Cartera de inmuebles</span><button class="btn btn-sm" onclick="nav('inmuebles',document.querySelectorAll('.sb-item')[1])">Ver todos →</button></div>
+        <table>
+          <thead><tr><th>Inmueble</th><th>Uso</th><th>Renta/año</th><th>Estado</th></tr></thead>
+          <tbody>
+            <tr><td><b>Apto. Estepona</b><br><span style="font-size:10px;color:var(--text2)">Málaga · 92 m²</span></td><td>Larga estancia</td><td>12.000 €</td><td><span class="badge badge-green">Al día</span></td></tr>
+            <tr><td><b>Local Marbella</b><br><span style="font-size:10px;color:var(--text2)">Málaga · 65 m²</span></td><td>Alquiler comercial</td><td>6.400 €</td><td><span class="badge badge-amber">Doc. pendiente</span></td></tr>
+            <tr><td><b>Villa Mijas</b><br><span style="font-size:10px;color:var(--text2)">Málaga · 180 m²</span></td><td>Uso propio</td><td>–</td><td><span class="badge badge-blue">Vacío</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Próximos vencimientos fiscales</span><button class="btn btn-sm" onclick="nav('tributos',document.querySelectorAll('.sb-item')[3])">Calendario →</button></div>
+        <table>
+          <thead><tr><th>Modelo</th><th>Inmueble</th><th>Vence</th><th>Estado</th></tr></thead>
+          <tbody>
+            <tr><td><b>M210 T3</b></td><td>Apto. Estepona</td><td>20 ene 2025</td><td><span class="badge badge-amber">Pendiente</span></td></tr>
+            <tr><td><b>M210 T3</b></td><td>Local Marbella</td><td>20 ene 2025</td><td><span class="badge badge-amber">Pendiente</span></td></tr>
+            <tr><td><b>M210 T4</b></td><td>Villa Mijas</td><td>20 abr 2025</td><td><span class="badge badge-gray">Próximo</span></td></tr>
+            <tr><td><b>Renta imputada</b></td><td>Villa Mijas</td><td>31 dic 2025</td><td><span class="badge badge-gray">Anual</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- INMUEBLES -->
+  <div class="page" id="page-inmuebles">
+    <div class="three-col" style="margin-bottom:1.5rem">
+      <div class="prop-card selected" onclick="showFicha(0)">
+        <div class="prop-img" style="background:linear-gradient(135deg,#9FE1CB,#E1F5EE)">🏠</div>
+        <div class="prop-body">
+          <div class="prop-name">Apto. Estepona</div>
+          <div class="prop-addr">Calle Real 14, 2ºA · Estepona, Málaga</div>
+          <div class="prop-row"><span class="prop-stat">Ref. catastral<br><strong>0123ABC</strong></span><span class="badge badge-green">Alquilado</span></div>
+        </div>
+      </div>
+      <div class="prop-card" onclick="showFicha(1)">
+        <div class="prop-img" style="background:linear-gradient(135deg,#FAEEDA,#FAC775)">🏢</div>
+        <div class="prop-body">
+          <div class="prop-name">Local Marbella</div>
+          <div class="prop-addr">Av. Ricardo Soriano 28, Local 3 · Marbella</div>
+          <div class="prop-row"><span class="prop-stat">Ref. catastral<br><strong>0456DEF</strong></span><span class="badge badge-amber">Doc. pendiente</span></div>
+        </div>
+      </div>
+      <div class="prop-card" onclick="showFicha(2)">
+        <div class="prop-img" style="background:linear-gradient(135deg,#E6F1FB,#B5D4F4)">🏡</div>
+        <div class="prop-body">
+          <div class="prop-name">Villa Mijas</div>
+          <div class="prop-addr">Urb. El Dorado 5 · Mijas, Málaga</div>
+          <div class="prop-row"><span class="prop-stat">Ref. catastral<br><strong>0789GHI</strong></span><span class="badge badge-blue">Uso propio</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="ficha-0" class="ficha">
+      <div class="ficha-header">
+        <div><div class="ficha-title">Apartamento · Estepona</div><div class="ficha-sub">Calle Real 14, 2ºA · 29680 Estepona, Málaga</div></div>
+        <div style="display:flex;gap:8px"><button class="btn btn-sm">✏️ Editar</button><button class="btn btn-sm btn-green">📄 Generar informe</button></div>
+      </div>
+      <div class="two-col">
+        <div>
+          <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:0.75rem;font-weight:500">Información registral</div>
+          <div class="detail-grid">
+            <div class="detail-item"><div class="detail-label">Ref. catastral</div><div class="detail-val">0123ABC4567DEF</div></div>
+            <div class="detail-item"><div class="detail-label">Registro propiedad</div><div class="detail-val">Estepona nº1, T.245</div></div>
+            <div class="detail-item"><div class="detail-label">Número de finca</div><div class="detail-val">14.567</div></div>
+            <div class="detail-item"><div class="detail-label">Año construcción</div><div class="detail-val">1998</div></div>
+            <div class="detail-item"><div class="detail-label">Superficie útil</div><div class="detail-val">92 m²</div></div>
+            <div class="detail-item"><div class="detail-label">Valor catastral</div><div class="detail-val">98.450 €</div></div>
+            <div class="detail-item"><div class="detail-label">Valor adquisición</div><div class="detail-val">210.000 €</div></div>
+            <div class="detail-item"><div class="detail-label">Fecha compra</div><div class="detail-val">12 mar 2018</div></div>
+            <div class="detail-item"><div class="detail-label">Tipo</div><div class="detail-val">Residencial</div></div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:0.75rem;font-weight:500">Situación financiera 2024</div>
+          <div style="display:flex;flex-direction:column;gap:0">
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--border)"><span style="font-size:12px;color:var(--text2)">Ingresos brutos alquiler</span><span style="font-weight:500">12.000 €</span></div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--border)"><span style="font-size:12px;color:var(--text2)">IBI</span><span style="color:var(--red-text)">–380 €</span></div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--border)"><span style="font-size:12px;color:var(--text2)">Comunidad propietarios</span><span style="color:var(--red-text)">–720 €</span></div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--border)"><span style="font-size:12px;color:var(--text2)">Seguro hogar</span><span style="color:var(--red-text)">–280 €</span></div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--border)"><span style="font-size:12px;color:var(--text2)">Gestoría / M210</span><span style="color:var(--red-text)">–350 €</span></div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;font-weight:500"><span>Rendimiento neto</span><span style="color:var(--green-mid)">10.270 €</span></div>
+            <div style="margin-top:6px">
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:4px"><span>Yield neto sobre adquisición</span><span style="font-weight:500;color:var(--text)">4,9%</span></div>
+              <div class="prog-wrap"><div class="prog-bar" style="width:49%"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="ficha-1" class="ficha" style="display:none">
+      <div class="ficha-header">
+        <div><div class="ficha-title">Local Comercial · Marbella</div><div class="ficha-sub">Av. Ricardo Soriano 28, Local 3 · 29600 Marbella</div></div>
+        <div style="display:flex;gap:8px"><button class="btn btn-sm">✏️ Editar</button><button class="btn btn-sm btn-green">📄 Generar informe</button></div>
+      </div>
+      <div class="detail-grid">
+        <div class="detail-item"><div class="detail-label">Ref. catastral</div><div class="detail-val">0456DEF8901GHI</div></div>
+        <div class="detail-item"><div class="detail-label">Registro propiedad</div><div class="detail-val">Marbella nº2, T.89</div></div>
+        <div class="detail-item"><div class="detail-label">Superficie útil</div><div class="detail-val">65 m²</div></div>
+        <div class="detail-item"><div class="detail-label">Valor catastral</div><div class="detail-val">72.300 €</div></div>
+        <div class="detail-item"><div class="detail-label">Valor adquisición</div><div class="detail-val">145.000 €</div></div>
+        <div class="detail-item"><div class="detail-label">Fecha compra</div><div class="detail-val">5 sep 2020</div></div>
+        <div class="detail-item"><div class="detail-label">Tipo</div><div class="detail-val">Comercial</div></div>
+        <div class="detail-item"><div class="detail-label">Rendimiento neto</div><div class="detail-val" style="color:var(--green-mid)">5.100 €</div></div>
+        <div class="detail-item"><div class="detail-label">Estado</div><div class="detail-val"><span class="badge badge-amber">Doc. pendiente</span></div></div>
+      </div>
+    </div>
+
+    <div id="ficha-2" class="ficha" style="display:none">
+      <div class="ficha-header">
+        <div><div class="ficha-title">Villa · Mijas</div><div class="ficha-sub">Urb. El Dorado 5 · 29650 Mijas, Málaga</div></div>
+        <div style="display:flex;gap:8px"><button class="btn btn-sm">✏️ Editar</button><button class="btn btn-sm btn-green">📄 Generar informe</button></div>
+      </div>
+      <div class="detail-grid">
+        <div class="detail-item"><div class="detail-label">Ref. catastral</div><div class="detail-val">0789GHI2345JKL</div></div>
+        <div class="detail-item"><div class="detail-label">Registro propiedad</div><div class="detail-val">Mijas nº1, T.301</div></div>
+        <div class="detail-item"><div class="detail-label">Superficie útil</div><div class="detail-val">180 m²</div></div>
+        <div class="detail-item"><div class="detail-label">Valor catastral</div><div class="detail-val">210.000 €</div></div>
+        <div class="detail-item"><div class="detail-label">Valor adquisición</div><div class="detail-val">480.000 €</div></div>
+        <div class="detail-item"><div class="detail-label">Fecha compra</div><div class="detail-val">22 jun 2015</div></div>
+        <div class="detail-item"><div class="detail-label">Uso</div><div class="detail-val">Uso propio</div></div>
+        <div class="detail-item"><div class="detail-label">Renta imputada IRNR</div><div class="detail-val">3.570 €/año</div></div>
+        <div class="detail-item"><div class="detail-label">Días ocupados 2024</div><div class="detail-val">42 días</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALQUILERES -->
+  <div class="page" id="page-alquileres">
+    <div class="rental-summary">
+      <div class="rs-item"><div class="rs-label">Ingresos 2024</div><div class="rs-val">18.400 €</div><div class="rs-sub">2 contratos activos</div></div>
+      <div class="rs-item"><div class="rs-label">Días alquilados</div><div class="rs-val">295 días</div><div class="rs-sub">Ambos inmuebles</div></div>
+      <div class="rs-item"><div class="rs-label">Ocupación media</div><div class="rs-val">80,8%</div><div class="rs-sub"><div class="prog-wrap"><div class="prog-bar" style="width:80%"></div></div></div></div>
+      <div class="rs-item"><div class="rs-label">Renta media/mes</div><div class="rs-val">1.533 €</div><div class="rs-sub">Larga estancia</div></div>
+      <div class="rs-item"><div class="rs-label">Gastos deducibles</div><div class="rs-val">1.730 €</div><div class="rs-sub">Declarables en M210</div></div>
+    </div>
+
+    <div class="alq-tabs">
+      <button class="alq-tab active" onclick="alqTab(this,'contratos')">Contratos activos</button>
+      <button class="alq-tab" onclick="alqTab(this,'historial')">Historial rentas</button>
+      <button class="alq-tab" onclick="alqTab(this,'inquilinos')">Inquilinos</button>
+    </div>
+
+    <div id="alq-contratos">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Contratos de arrendamiento activos</span><button class="btn btn-sm btn-green">+ Nuevo contrato</button></div>
+        <table>
+          <thead><tr><th>Inmueble</th><th>Inquilino</th><th>Tipo</th><th>Inicio</th><th>Vencimiento</th><th>Renta/mes</th><th>Fianza</th><th>Estado</th><th></th></tr></thead>
+          <tbody>
+            <tr>
+              <td><b>Apto. Estepona</b></td><td>Lars Svensson</td>
+              <td><span class="badge badge-blue">Larga estancia</span></td>
+              <td>1 mar 2023</td><td>28 feb 2025</td><td><b>1.000 €</b></td><td>2.000 €</td>
+              <td><span class="badge badge-amber">Vence en 47d</span></td>
+              <td><button class="btn btn-sm">Ver</button></td>
+            </tr>
+            <tr>
+              <td><b>Local Marbella</b></td><td>Comercial MRB S.L.</td>
+              <td><span class="badge badge-purple">Comercial</span></td>
+              <td>1 ene 2022</td><td>31 dic 2026</td><td><b>533 €</b></td><td>1.600 €</td>
+              <td><span class="badge badge-green">Vigente</span></td>
+              <td><button class="btn btn-sm">Ver</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-header"><span class="card-title">Detalle contrato · Apto. Estepona</span></div>
+          <div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--border)"><span style="font-size:12px;color:var(--text2)">Tipo de arrendamiento</span><span style="font-size:12px;font-weight:500">Vivienda habitual (LAU)</span></div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--border)"><span style="font-size:12px;color:var(--text2)">Duración pactada</span><span style="font-size:12px;font-weight:500">24 meses</span></div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--border)"><span style="font-size:12px;color:var(--text2)">Prórroga tácita</span><span style="font-size:12px;font-weight:500">Sí, mensual</span></div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--border)"><span style="font-size:12px;color:var(--text2)">Actualización IPC</span><span style="font-size:12px;font-weight:500">Sí, anual</span></div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--border)"><span style="font-size:12px;color:var(--text2)">Gastos incluidos</span><span style="font-size:12px;font-weight:500">No (inquilino paga)</span></div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0"><span style="font-size:12px;color:var(--text2)">Depósito fianza registrado</span><span class="badge badge-green">Sí · Junta Andalucía</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Historial de pagos 2024</span></div>
+          <table>
+            <thead><tr><th>Mes</th><th>Importe</th><th>Fecha cobro</th><th>Estado</th></tr></thead>
+            <tbody>
+              <tr><td>Dic 2024</td><td>1.000 €</td><td>3 dic</td><td><span class="badge badge-green">Cobrado</span></td></tr>
+              <tr><td>Nov 2024</td><td>1.000 €</td><td>2 nov</td><td><span class="badge badge-green">Cobrado</span></td></tr>
+              <tr><td>Oct 2024</td><td>1.000 €</td><td>5 oct</td><td><span class="badge badge-green">Cobrado</span></td></tr>
+              <tr><td>Sep 2024</td><td>1.000 €</td><td>1 sep</td><td><span class="badge badge-green">Cobrado</span></td></tr>
+              <tr><td>Ago 2024</td><td>1.000 €</td><td>8 ago</td><td><span class="badge badge-amber">Retraso 7d</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div id="alq-historial" style="display:none">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Rentas cobradas 2024 – todos los inmuebles</span></div>
+        <table>
+          <thead><tr><th>Período</th><th>Inmueble</th><th>Días alquilados</th><th>Renta bruta</th><th>Gastos deducibles</th><th>Neto declarable</th><th>M210</th></tr></thead>
+          <tbody>
+            <tr><td>Oct–Dic 2024</td><td>Apto. Estepona</td><td>92</td><td>3.000 €</td><td>320 €</td><td>2.680 €</td><td><span class="badge badge-amber">Pendiente</span></td></tr>
+            <tr><td>Jul–Sep 2024</td><td>Apto. Estepona</td><td>92</td><td>3.000 €</td><td>310 €</td><td>2.690 €</td><td><span class="badge badge-green">Presentado</span></td></tr>
+            <tr><td>Abr–Jun 2024</td><td>Apto. Estepona</td><td>91</td><td>3.000 €</td><td>290 €</td><td>2.710 €</td><td><span class="badge badge-green">Presentado</span></td></tr>
+            <tr><td>Ene–Mar 2024</td><td>Apto. Estepona</td><td>90</td><td>3.000 €</td><td>300 €</td><td>2.700 €</td><td><span class="badge badge-green">Presentado</span></td></tr>
+            <tr><td>Ene–Dic 2024</td><td>Local Marbella</td><td>365</td><td>6.400 €</td><td>510 €</td><td>5.890 €</td><td><span class="badge badge-amber">Pendiente</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="alq-inquilinos" style="display:none">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Inquilinos activos</span><button class="btn btn-sm btn-green">+ Añadir inquilino</button></div>
+        <table>
+          <thead><tr><th>Nombre</th><th>Inmueble</th><th>Nacionalidad</th><th>DNI/Pasaporte</th><th>Teléfono</th><th>Email</th><th>Contrato</th></tr></thead>
+          <tbody>
+            <tr><td><b>Lars Svensson</b></td><td>Apto. Estepona</td><td>🇸🇪 Suecia</td><td>SE-AB123456</td><td>+46 70 123 456</td><td>lars@email.se</td><td><span class="badge badge-amber">Vence feb 2025</span></td></tr>
+            <tr><td><b>Comercial MRB S.L.</b></td><td>Local Marbella</td><td>🇪🇸 España</td><td>B-12345678</td><td>+34 952 123 456</td><td>info@mrb.es</td><td><span class="badge badge-green">Vigente 2026</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRIBUTOS -->
+  <div class="page" id="page-tributos">
+    <div class="two-col" style="margin-bottom:1.5rem">
+      <div>
+        <div class="alert alert-warn"><span class="alert-icon">⚠️</span><div><strong>2 declaraciones pendientes de presentación</strong>Plazo máximo: 20 enero 2025 para los trimestres T3 2024.</div></div>
+        <div class="alert alert-info" style="margin-top:8px"><span class="alert-icon">ℹ️</span><div><strong>Convenio doble imposición: España–Suecia (vigente)</strong>Tipo sobre rentas: 15%. Renta imputada: 24%.</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div class="kpi"><div class="kpi-label">Pagado en 2024</div><div class="kpi-val">1.845 €</div><div class="kpi-sub up">3 modelos presentados</div></div>
+        <div class="kpi"><div class="kpi-label">Pendiente 2024</div><div class="kpi-val">1.230 €</div><div class="kpi-sub danger">Vence 20 ene 2025</div></div>
+      </div>
+    </div>
+
+    <div class="section-title">Calendario fiscal 2024–2025</div>
+    <div class="cal-grid" style="margin-bottom:1.5rem">
+      <div class="cal-item done"><div class="cal-month">Abr 2024</div><div class="cal-desc">M210 – T1 2024</div><div class="cal-detail">Apto. Estepona · 402 €</div><div style="margin-top:6px"><span class="badge badge-green">Presentado</span></div></div>
+      <div class="cal-item done"><div class="cal-month">Jul 2024</div><div class="cal-desc">M210 – T2 2024</div><div class="cal-detail">Apto. Estepona · 404 €</div><div style="margin-top:6px"><span class="badge badge-green">Presentado</span></div></div>
+      <div class="cal-item done"><div class="cal-month">Oct 2024</div><div class="cal-desc">M210 – T3 2024</div><div class="cal-detail">Local Marbella · 1.039 €</div><div style="margin-top:6px"><span class="badge badge-green">Presentado</span></div></div>
+      <div class="cal-item urgent"><div class="cal-month">Ene 2025 · ⚠️ URGENTE</div><div class="cal-desc">M210 – T3 2024</div><div class="cal-detail">Apto. Estepona + Local · 1.230 €</div><div style="margin-top:6px"><span class="badge badge-amber">Pendiente</span></div></div>
+      <div class="cal-item soon"><div class="cal-month">Abr 2025</div><div class="cal-desc">M210 – T4 2024</div><div class="cal-detail">Todos los inmuebles</div><div style="margin-top:6px"><span class="badge badge-gray">Próximo</span></div></div>
+      <div class="cal-item ok"><div class="cal-month">Dic 2025</div><div class="cal-desc">Renta imputada anual</div><div class="cal-detail">Villa Mijas · 3.570 €</div><div style="margin-top:6px"><span class="badge badge-gray">Anual</span></div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-title">Calculadora Modelo 210</span><span style="font-size:11px;color:var(--text3)">Estimación orientativa · no vinculante</span></div>
+      <div class="calc-form">
+        <div class="form-group"><label class="form-label">Inmueble</label>
+          <select class="form-input" onchange="calcM210()">
+            <option>Apto. Estepona (alquilado)</option>
+            <option>Local Marbella (alquilado)</option>
+            <option>Villa Mijas (uso propio)</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">País de residencia fiscal</label>
+          <select class="form-input" onchange="calcM210()">
+            <option>Suecia (CDI – tipo 15%)</option>
+            <option>Alemania (CDI – tipo 15%)</option>
+            <option>Reino Unido (CDI – tipo 15%)</option>
+            <option>Francia (CDI – tipo 15%)</option>
+            <option>Sin convenio (tipo 24%)</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Ingresos brutos del trimestre (€)</label>
+          <input class="form-input" type="number" value="3000" id="ingresos" oninput="calcM210()"/>
+        </div>
+        <div class="form-group"><label class="form-label">Gastos deducibles del trimestre (€)</label>
+          <input class="form-input" type="number" value="320" id="gastos" oninput="calcM210()"/>
+        </div>
+        <div class="form-group"><label class="form-label">Valor catastral del inmueble (€)</label>
+          <input class="form-input" type="number" value="98450" id="catastral" oninput="calcM210()"/>
+        </div>
+        <div class="form-group"><label class="form-label">Días alquilados en el trimestre</label>
+          <input class="form-input" type="number" value="90" id="dias" oninput="calcM210()"/>
+        </div>
+      </div>
+      <div class="calc-result">
+        <div class="calc-result-title">Resultado estimado</div>
+        <div class="calc-result-grid">
+          <div><div class="r-label">Base imponible</div><div class="r-val" id="base">2.680 €</div></div>
+          <div><div class="r-label">Tipo aplicable</div><div class="r-val">15%</div></div>
+          <div><div class="r-label">Cuota a ingresar</div><div class="r-val" id="cuota">402 €</div></div>
+        </div>
+        <div style="margin-top:1rem;display:flex;gap:8px">
+          <button class="btn btn-green">📥 Descargar modelo 210</button>
+          <button class="btn">📤 Enviar a mi gestor</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DOCUMENTOS -->
+  <div class="page" id="page-documentos">
+    <div class="two-col" style="align-items:start">
+      <div>
+        <div class="section-title">Categorías</div>
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--green-pale);border-radius:var(--r);border-left:2px solid var(--green-mid);cursor:pointer"><span style="font-size:12px;font-weight:500;color:var(--green)">📋 Todos los documentos</span><span class="badge badge-green">18</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--surface);border:0.5px solid var(--border);border-radius:var(--r);cursor:pointer"><span style="font-size:12px;color:var(--text2)">🏛️ Escrituras y registral</span><span class="badge badge-gray">3</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--surface);border:0.5px solid var(--border);border-radius:var(--r);cursor:pointer"><span style="font-size:12px;color:var(--text2)">📋 Modelos 210 presentados</span><span class="badge badge-gray">5</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--surface);border:0.5px solid var(--border);border-radius:var(--r);cursor:pointer"><span style="font-size:12px;color:var(--text2)">🔑 Contratos de alquiler</span><span class="badge badge-gray">4</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--surface);border:0.5px solid var(--border);border-radius:var(--r);cursor:pointer"><span style="font-size:12px;color:var(--text2)">🏦 IBI y comunidad</span><span class="badge badge-gray">4</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--surface);border:0.5px solid var(--border);border-radius:var(--r);cursor:pointer"><span style="font-size:12px;color:var(--text2)">🛡️ Seguros</span><span class="badge badge-gray">2</span></div>
+        </div>
+      </div>
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+          <div class="section-title" style="margin-bottom:0">Todos los documentos (18)</div>
+          <button class="btn btn-sm btn-green">+ Subir documento</button>
+        </div>
+        <table>
+          <thead><tr><th>Nombre</th><th>Inmueble</th><th>Categoría</th><th>Fecha</th><th>Subido por</th><th></th></tr></thead>
+          <tbody>
+            <tr><td>📄 Escritura compraventa</td><td>Apto. Estepona</td><td><span class="badge badge-blue">Registral</span></td><td>12 mar 2018</td><td>Notaría García</td><td><button class="btn btn-sm">⬇</button></td></tr>
+            <tr><td>📄 Contrato arrendamiento</td><td>Apto. Estepona</td><td><span class="badge badge-purple">Alquiler</span></td><td>1 mar 2023</td><td>Johan H.</td><td><button class="btn btn-sm">⬇</button></td></tr>
+            <tr><td>📋 Modelo 210 – T2 2024</td><td>Apto. Estepona</td><td><span class="badge badge-green">Fiscal</span></td><td>15 jul 2024</td><td>García &amp; Asoc.</td><td><button class="btn btn-sm">⬇</button></td></tr>
+            <tr><td>🏦 Recibo IBI 2024</td><td>Apto. Estepona</td><td><span class="badge badge-amber">IBI</span></td><td>5 oct 2024</td><td>Johan H.</td><td><button class="btn btn-sm">⬇</button></td></tr>
+            <tr><td>📄 Escritura compraventa</td><td>Local Marbella</td><td><span class="badge badge-blue">Registral</span></td><td>5 sep 2020</td><td>Notaría López</td><td><button class="btn btn-sm">⬇</button></td></tr>
+            <tr><td>📋 Modelo 210 – T3 2024</td><td>Local Marbella</td><td><span class="badge badge-green">Fiscal</span></td><td>2 oct 2024</td><td>García &amp; Asoc.</td><td><button class="btn btn-sm">⬇</button></td></tr>
+            <tr><td>🛡️ Seguro hogar 2024</td><td>Villa Mijas</td><td><span class="badge badge-gray">Seguro</span></td><td>1 ene 2024</td><td>Johan H.</td><td><button class="btn btn-sm">⬇</button></td></tr>
+            <tr><td>📄 Escritura compraventa</td><td>Villa Mijas</td><td><span class="badge badge-blue">Registral</span></td><td>22 jun 2015</td><td>Notaría Ruiz</td><td><button class="btn btn-sm">⬇</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+const titles={resumen:'Resumen',inmuebles:'Mis inmuebles',alquileres:'Alquileres',tributos:'Obligaciones tributarias',documentos:'Documentos'};
+
+function nav(id,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if(el) el.classList.add('active');
+  document.getElementById('page-title').textContent=titles[id]||id;
+}
+
+function showFicha(idx){
+  document.querySelectorAll('.prop-card').forEach((c,i)=>c.classList.toggle('selected',i===idx));
+  for(let i=0;i<3;i++){
+    const f=document.getElementById('ficha-'+i);
+    if(f) f.style.display=i===idx?'block':'none';
+  }
+}
+
+function alqTab(el,id){
+  document.querySelectorAll('.alq-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  ['contratos','historial','inquilinos'].forEach(k=>{
+    const d=document.getElementById('alq-'+k);
+    if(d) d.style.display=k===id?'block':'none';
+  });
+}
+
+function calcM210(){
+  const ing=parseFloat(document.getElementById('ingresos').value)||0;
+  const gas=parseFloat(document.getElementById('gastos').value)||0;
+  const base=Math.max(0,ing-gas);
+  const cuota=Math.round(base*0.15);
+  document.getElementById('base').textContent=base.toLocaleString('es-ES')+' €';
+  document.getElementById('cuota').textContent=cuota.toLocaleString('es-ES')+' €';
+}
+</script>
+</body>
+</html>

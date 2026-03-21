@@ -1,0 +1,2629 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ResidIA – Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f6f5f2;--surface:#fff;--surface2:#efeee9;
+  --text:#141414;--text2:#5c5c5c;--text3:#a0a0a0;
+  --border:rgba(0,0,0,0.07);--border2:rgba(0,0,0,0.14);
+  --green:#064e3b;--green-mid:#10b981;--green-pale:#ecfdf5;--green-soft:#a7f3d0;--green-text:#065f46;
+  --amber:#fef3c7;--amber-text:#92400e;--amber-dk:#78350f;
+  --red:#fef2f2;--red-text:#b91c1c;--red-mid:#ef4444;
+  --blue:#eff6ff;--blue-text:#1e40af;
+  --purple:#f5f3ff;--purple-text:#6d28d9;
+  --r:10px;--r-lg:14px;--r-xl:18px;
+  --s1:0 1px 2px rgba(0,0,0,0.04);
+  --s2:0 4px 16px rgba(0,0,0,0.06);
+  --s3:0 12px 32px rgba(0,0,0,0.1);
+  --ease:cubic-bezier(.4,0,.2,1);--sidebar-w:250px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;color:var(--text);background:var(--bg);display:flex;min-height:100vh;font-size:14px;-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px}
+
+/* OVERLAY */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:49;backdrop-filter:blur(3px)}
+.overlay.on{display:block}
+
+/* SIDEBAR */
+.sb{width:var(--sidebar-w);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;z-index:50;flex-shrink:0;transition:transform .3s var(--ease)}
+.sb-logo{padding:1.4rem 1.5rem 1rem;font-family:'Playfair Display',serif;font-size:20px;font-weight:600;border-bottom:1px solid var(--border);letter-spacing:-.4px;display:flex;align-items:center;justify-content:space-between}
+.sb-logo em{font-style:normal;color:var(--green-mid)}
+.sb-logo-tag{font-family:'DM Sans',sans-serif;font-size:9px;font-weight:500;background:var(--green-pale);color:var(--green-text);padding:2px 7px;border-radius:20px;letter-spacing:.5px}
+.sb-user{display:flex;align-items:center;gap:11px;padding:1rem 1.5rem;border-bottom:1px solid var(--border)}
+.sb-name{font-size:12.5px;font-weight:500;line-height:1.3}.sb-meta{font-size:11px;color:var(--text2)}
+.sb-sect{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);padding:1rem 1.5rem .35rem;font-weight:500}
+.sb-nav{display:flex;flex-direction:column;gap:1px;padding:0 .5rem}
+.sb-btn{display:flex;align-items:center;gap:10px;padding:.6rem 1rem;cursor:pointer;font-size:13px;color:var(--text2);transition:all .15s var(--ease);border-radius:var(--r);border:none;background:none;width:100%;text-align:left;font-family:inherit;position:relative}
+.sb-btn:hover{color:var(--text);background:var(--bg)}
+.sb-btn.on{color:var(--green);background:var(--green-pale);font-weight:500}
+.sb-btn.locked{color:var(--text3);cursor:default}.sb-btn.locked:hover{background:none;color:var(--text3)}
+.sb-btn .pill{margin-left:auto;font-size:9px;padding:2px 7px;border-radius:20px;font-weight:500}
+.sb-btn .lock-ico{margin-left:auto;opacity:.4;font-size:10px}
+.sb-foot{margin-top:auto;padding:1rem 1.5rem;border-top:1px solid var(--border);font-size:10.5px;color:var(--text3);line-height:1.7}
+#sbPlanBox{border-radius:var(--r);padding:8px 11px;margin-top:.6rem}
+
+/* HAM */
+.ham{display:none;width:36px;height:36px;border:1px solid var(--border2);border-radius:var(--r);background:var(--surface);cursor:pointer;flex-direction:column;align-items:center;justify-content:center;gap:4px;flex-shrink:0}
+.ham span{display:block;width:15px;height:1.5px;background:var(--text);border-radius:2px}
+
+/* MAIN */
+.main{flex:1;overflow-y:auto;min-width:0}
+.top{display:flex;align-items:center;justify-content:space-between;padding:.9rem 2rem;background:rgba(255,255,255,.88);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10}
+.top h1{font-family:'Playfair Display',serif;font-size:20px;font-weight:500;letter-spacing:-.3px}
+.top-r{display:flex;gap:8px;align-items:center}
+
+/* BTNS */
+.b{display:inline-flex;align-items:center;gap:6px;padding:7px 15px;border-radius:var(--r);cursor:pointer;font-size:12px;font-weight:500;font-family:inherit;border:1px solid var(--border2);background:var(--surface);color:var(--text);transition:all .18s var(--ease);white-space:nowrap}
+.b:hover{background:var(--bg);box-shadow:var(--s2);transform:translateY(-.5px)}.b:active{transform:translateY(0)}
+.b-g{background:var(--green);color:#ecfdf5;border:none;box-shadow:0 2px 10px rgba(6,78,59,.22)}
+.b-g:hover{box-shadow:0 4px 18px rgba(6,78,59,.28);transform:translateY(-1px);opacity:.94}
+.b-s{padding:5px 11px;font-size:11px}
+.b-ghost{border:none;background:none;box-shadow:none;color:var(--text2);padding:5px 8px}
+.b-ghost:hover{color:var(--text);background:var(--bg);box-shadow:none}
+
+/* PAGES */
+.pg{display:none;padding:2rem;animation:fadeUp .35s var(--ease)}.pg.on{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* GRID */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.25rem}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem}
+
+/* KPI */
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:1.15rem 1.3rem;transition:all .25s var(--ease);box-shadow:var(--s1)}
+.kpi:hover{box-shadow:var(--s2);transform:translateY(-2px)}
+.kpi-l{font-size:11px;color:var(--text2);margin-bottom:6px}.kpi-v{font-size:26px;font-weight:600;line-height:1;letter-spacing:-.6px;font-variant-numeric:tabular-nums}
+.kpi-s{font-size:11px;margin-top:5px;font-weight:500}
+.up{color:var(--green-mid)}.warn{color:var(--amber-text)}.err{color:var(--red-text)}
+
+/* CARD */
+.c{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:1.3rem;margin-bottom:1.25rem;box-shadow:var(--s1);transition:box-shadow .25s var(--ease)}
+.c:hover{box-shadow:var(--s2)}
+.c-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.c-t{font-size:13.5px;font-weight:500}
+
+/* TABLE */
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;padding:9px 13px;font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border)}
+td{padding:10px 13px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}tr:hover td{background:var(--bg)}
+
+/* BADGE */
+.bd{display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:3px 9px;border-radius:20px;font-weight:500}
+.bd-g{background:var(--green-pale);color:var(--green-text)}.bd-a{background:var(--amber);color:var(--amber-text)}
+.bd-r{background:var(--red);color:var(--red-text)}.bd-b{background:var(--blue);color:var(--blue-text)}
+.bd-p{background:var(--purple);color:var(--purple-text)}.bd-0{background:var(--surface2);color:var(--text2)}
+
+/* ALERT */
+.al{display:flex;align-items:flex-start;gap:10px;padding:13px 17px;border-radius:var(--r);margin-bottom:1rem;font-size:12px;line-height:1.55}
+.al b{font-weight:500;display:block;margin-bottom:2px}
+.al-w{background:var(--amber);color:var(--amber-dk)}.al-i{background:var(--blue);color:var(--blue-text)}.al-ok{background:var(--green-pale);color:var(--green-text)}
+
+/* FORM */
+.fg{display:flex;flex-direction:column;gap:4px;margin-bottom:.9rem}
+.fl{font-size:11px;color:var(--text2);font-weight:500}
+.fi{padding:9px 12px;border:1px solid var(--border2);border-radius:var(--r);font-size:13px;font-family:inherit;background:var(--surface);color:var(--text);width:100%;transition:all .18s var(--ease)}
+.fi:focus{outline:none;border-color:var(--green-mid);box-shadow:0 0 0 3px rgba(16,185,129,.1)}
+select.fi{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5L6 7.5L9 4.5' fill='none' stroke='%235c5c5c' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
+.fh{font-size:10px;color:var(--text3);margin-top:2px;line-height:1.4}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+
+/* UTILITY */
+.sec{font-size:9.5px;text-transform:uppercase;letter-spacing:1.2px;color:var(--text3);font-weight:500;margin-bottom:.7rem}
+.hr{height:1px;background:var(--border);margin:1rem 0}
+.dr{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:12px;align-items:center}
+.dr:last-child{border-bottom:none}
+.dr-l{color:var(--text2)}.dr-v{font-weight:500}
+.db{padding:7px 0;border-bottom:1px solid var(--border)}.db:last-child{border-bottom:none}
+.db-l{font-size:10px;color:var(--text3);margin-bottom:1px}.db-v{font-size:13px;font-weight:500}
+
+/* TABS */
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:1.5rem}
+.tab{padding:.8rem 1.3rem;cursor:pointer;font-size:13px;color:var(--text2);border-bottom:2.5px solid transparent;margin-bottom:-1px;transition:all .15s var(--ease);display:flex;align-items:center;gap:7px}
+.tab:hover{color:var(--text);background:rgba(0,0,0,.02)}.tab.on{color:var(--green);border-bottom-color:var(--green-mid);font-weight:500}
+.stabs{display:inline-flex;gap:3px;background:var(--surface2);padding:3px;border-radius:var(--r);margin-bottom:1.3rem}
+.stab{padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;color:var(--text2);border:none;background:none;font-family:inherit;transition:all .15s var(--ease)}
+.stab:hover{color:var(--text)}.stab.on{background:var(--surface);color:var(--text);font-weight:500;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+
+/* TIMELINE — new vertical on mobile, horizontal on desktop */
+.tl{display:flex;align-items:center;gap:0;margin-bottom:1rem;overflow-x:auto;padding:4px 0}
+.tl-s{display:flex;flex-direction:column;align-items:center;flex:1;min-width:72px}
+.tl-d{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;z-index:1;transition:all .3s var(--ease)}
+.tl-d.done{background:var(--green);color:#ecfdf5;box-shadow:0 2px 8px rgba(6,78,59,.2)}
+.tl-d.now{background:var(--amber);color:var(--amber-dk);animation:pulseDot 2s infinite}
+.tl-d.wait{background:var(--surface);border:1.5px solid var(--border2);color:var(--text3)}
+.tl-ln{flex:1;height:2px;margin-bottom:18px}
+.tl-ln.done{background:linear-gradient(90deg,var(--green-mid),var(--green-soft))}
+.tl-ln.wait{background:var(--border)}
+.tl-lb{font-size:9px;color:var(--text3);text-align:center;margin-top:4px;line-height:1.3;max-width:72px}
+.tl-lb.done{color:var(--green-text)}.tl-lb.now{color:var(--amber-text);font-weight:500}
+@keyframes pulseDot{0%,100%{box-shadow:0 0 0 0 rgba(146,64,14,.3)}50%{box-shadow:0 0 0 7px rgba(146,64,14,0)}}
+
+/* CHECK */
+.ck{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);font-size:12px}
+.ck:last-child{border-bottom:none}
+.ck-i{width:20px;height:20px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;margin-top:1px}
+.ck-ok{background:var(--green-pale);color:var(--green-text)}.ck-w{background:var(--amber);color:var(--amber-dk)}.ck-m{background:var(--red);color:var(--red-text)}
+
+/* LOCK BANNER */
+.lock{background:var(--amber);border-radius:var(--r-lg);padding:1.3rem;margin-bottom:1.3rem;display:flex;align-items:center;gap:14px;box-shadow:var(--s1)}
+body.dev .lock{display:none}
+
+/* FISCAL MINI-CARD */
+.fc{border-radius:var(--r);padding:.9rem;cursor:pointer;transition:all .18s var(--ease);margin-bottom:.5rem}
+.fc:hover{transform:translateY(-1px);box-shadow:var(--s1)}
+
+/* DOC CAT */
+.dc{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);cursor:pointer;transition:all .18s var(--ease)}
+.dc:hover{background:var(--bg);box-shadow:var(--s1)}
+.dc.on{background:var(--green-pale);border-color:var(--green-soft)}
+
+/* PLAN */
+.pf{padding:12px;border-radius:var(--r);transition:all .18s var(--ease)}.pf:hover{transform:translateY(-1px);box-shadow:var(--s1)}
+.stepper{display:flex;align-items:center;gap:10px}
+.stepper-v{font-size:22px;font-weight:600;min-width:28px;text-align:center;font-variant-numeric:tabular-nums;transition:transform .15s var(--ease)}
+
+/* === PRESENTATION WIZARD CARD === */
+.m210-hero{border-radius:var(--r-xl);overflow:hidden;margin-bottom:1.3rem;position:relative}
+.m210-hero.urgent{background:linear-gradient(135deg,#fef2f2 0%,#fef3c7 100%);border:1px solid rgba(185,28,28,.12)}
+.m210-hero.prep{background:var(--surface2);border:1px solid var(--border)}
+.m210-hero.done{background:var(--green-pale);border:1px solid rgba(16,185,129,.15)}
+.m210-top{padding:1.5rem 1.5rem 0;display:flex;justify-content:space-between;align-items:flex-start}
+.m210-label{font-size:10px;letter-spacing:1px;text-transform:uppercase;font-weight:600;margin-bottom:4px}
+.m210-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:500;letter-spacing:-.3px}
+.m210-amt{font-size:28px;font-weight:600;letter-spacing:-.5px;line-height:1;font-variant-numeric:tabular-nums}
+.m210-body{padding:1.25rem 1.5rem 1.5rem}
+.m210-meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:1rem;margin-bottom:1rem;font-size:12px}
+.m210-meta dt{font-size:10px;color:var(--text3);margin-bottom:2px}.m210-meta dd{font-weight:500}
+.m210-actions{display:flex;gap:8px;flex-wrap:wrap}
+
+/* PROGRESS RING */
+.ring{position:relative;width:52px;height:52px;flex-shrink:0}
+.ring svg{transform:rotate(-90deg)}
+.ring-bg{fill:none;stroke:var(--border);stroke-width:4}
+.ring-fg{fill:none;stroke-width:4;stroke-linecap:round;transition:stroke-dashoffset .6s var(--ease)}
+.ring-txt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600}
+
+/* CAL */
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;font-size:11px;text-align:center}
+.cal-h{font-size:9px;color:var(--text3);font-weight:500;padding:4px 0;text-transform:uppercase}
+.cal-d{padding:6px 2px;border-radius:5px;cursor:default;transition:all .12s var(--ease)}
+.cal-d.occ{background:var(--green-pale);color:var(--green-text);font-weight:500}
+.cal-d.par{background:var(--amber);color:var(--amber-dk)}
+.cal-d.emp{color:var(--text3)}
+
+/* BAR */
+.bar{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;margin-top:3px}
+.bar-f{height:100%;border-radius:3px;transition:width .6s var(--ease)}
+
+/* DEV */
+.dev-btn{position:fixed;bottom:20px;right:20px;z-index:100;display:flex;align-items:center;gap:8px;padding:7px 14px;border-radius:20px;cursor:pointer;background:var(--surface);border:1px solid var(--border2);box-shadow:var(--s2);font-size:11px;font-weight:500;color:var(--text2);transition:all .3s var(--ease);font-family:inherit;user-select:none}
+.dev-btn:hover{box-shadow:var(--s3);transform:translateY(-1px)}
+.dev-btn.on{background:#111;color:#e5e5e5;border-color:#333}
+.dev-dot{width:7px;height:7px;border-radius:50%;background:var(--text3);transition:all .3s var(--ease)}
+.dev-btn.on .dev-dot{background:#4ade80;box-shadow:0 0 8px rgba(74,222,128,.5)}
+.dev-sw{width:30px;height:16px;border-radius:8px;background:var(--border2);position:relative;transition:all .3s var(--ease);flex-shrink:0}
+.dev-sw::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:#fff;transition:all .3s var(--ease);box-shadow:0 1px 2px rgba(0,0,0,.15)}
+.dev-btn.on .dev-sw{background:#4ade80}.dev-btn.on .dev-sw::after{left:16px}
+body.dev .sb-btn.locked{color:var(--text2);cursor:pointer}
+body.dev .sb-btn.locked:hover{background:var(--bg);color:var(--text)}
+body.dev .sb-btn.locked .lock-ico{display:none}
+body.dev .dev-hide{display:none}
+.toast{position:fixed;bottom:68px;right:20px;z-index:200;padding:10px 16px;border-radius:var(--r);font-size:12px;font-weight:500;color:#fff;transform:translateY(16px);opacity:0;transition:all .3s var(--ease);pointer-events:none;box-shadow:var(--s3)}
+.toast.show{transform:none;opacity:1}
+.toast-ok{background:var(--green)}.toast-w{background:var(--amber-dk)}
+
+/* SIMULATOR */
+.sim-hero{background:linear-gradient(135deg,var(--green),#065f46);border-radius:var(--r-xl);padding:1.5rem 1.75rem;color:#ecfdf5;margin-bottom:1.5rem}
+.sim-hero h2{font-family:'Playfair Display',serif;font-size:22px;font-weight:500;letter-spacing:-.3px;margin-bottom:4px}
+.sim-hero p{font-size:12px;color:var(--green-soft);line-height:1.5}
+.sim-row{display:flex;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid var(--border)}
+.sim-row:last-child{border-bottom:none}
+.sim-label{width:160px;flex-shrink:0}.sim-label-t{font-size:12px;font-weight:500}.sim-label-d{font-size:10px;color:var(--text3);margin-top:1px}
+.sim-slider{flex:1;position:relative}
+.sim-slider input[type=range]{width:100%;height:6px;-webkit-appearance:none;appearance:none;background:var(--surface2);border-radius:3px;outline:none;cursor:pointer}
+.sim-slider input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--green);cursor:pointer;box-shadow:0 2px 6px rgba(6,78,59,.3);transition:transform .15s var(--ease)}
+.sim-slider input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.15)}
+.sim-slider input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--green);cursor:pointer;border:none;box-shadow:0 2px 6px rgba(6,78,59,.3)}
+.sim-val{width:100px;text-align:right;font-size:16px;font-weight:600;font-variant-numeric:tabular-nums;flex-shrink:0}
+.sim-result{border-radius:var(--r-xl);overflow:hidden}
+.sim-result-row{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;font-size:13px}
+.sim-result-row:nth-child(odd){background:var(--surface)}
+.sim-result-row:nth-child(even){background:var(--surface2)}
+.sim-big{font-size:28px;font-weight:600;letter-spacing:-.5px;font-variant-numeric:tabular-nums}
+.sim-compare{display:grid;grid-template-columns:1fr 1fr;gap:0;border-radius:var(--r-xl);overflow:hidden;margin-top:1rem}
+.sim-compare-col{padding:1.25rem 1.5rem;text-align:center}
+.sim-compare-col:first-child{background:var(--red);color:var(--red-text)}
+.sim-compare-col:last-child{background:var(--green-pale);color:var(--green-text)}
+.sim-compare-label{font-size:10px;text-transform:uppercase;letter-spacing:1px;font-weight:500;margin-bottom:6px}
+.sim-compare-val{font-size:26px;font-weight:600;letter-spacing:-.5px}
+.sim-compare-sub{font-size:11px;margin-top:4px;opacity:.8}
+.sim-bar-track{height:24px;background:var(--surface2);border-radius:12px;overflow:hidden;position:relative;margin:8px 0}
+.sim-bar-fill{height:100%;border-radius:12px;transition:width .4s var(--ease);display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-size:10px;font-weight:600;color:white;min-width:40px}
+.sim-scenario{border:2px dashed var(--border2);border-radius:var(--r-lg);padding:1.25rem;margin-top:1rem;transition:all .2s var(--ease)}
+.sim-scenario.active{border-color:var(--green-mid);border-style:solid;background:var(--green-pale)}
+
+/* SLIDER */
+.slider-wrap{margin-bottom:1rem}
+.slider-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.slider-label{font-size:12px;font-weight:500}
+.slider-val{font-size:18px;font-weight:600;color:var(--green);font-variant-numeric:tabular-nums;letter-spacing:-.3px}
+input[type=range]{-webkit-appearance:none;width:100%;height:6px;border-radius:3px;background:var(--surface2);outline:none;transition:background .15s}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--green);cursor:pointer;box-shadow:0 2px 6px rgba(6,78,59,.25);transition:transform .15s}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.15)}
+input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--green);cursor:pointer;border:none}
+
+/* COMPARISON BAR */
+.comp-bar{display:flex;align-items:center;gap:0;height:32px;border-radius:6px;overflow:hidden;margin:6px 0}
+.comp-bar div{height:100%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;transition:width .5s var(--ease)}
+
+/* RESULT HERO */
+.sim-hero{border-radius:var(--r-xl);padding:1.5rem;text-align:center;transition:all .3s var(--ease)}
+.sim-hero-val{font-size:42px;font-weight:700;letter-spacing:-1.5px;line-height:1;font-variant-numeric:tabular-nums}
+.sim-hero-sub{font-size:12px;margin-top:6px}
+
+/* FEED */
+.feed-item{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--border);position:relative}
+.feed-item:last-child{border-bottom:none}
+.feed-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.feed-line{position:absolute;left:4px;top:28px;bottom:-14px;width:2px;background:var(--border)}
+.feed-item:last-child .feed-line{display:none}
+.feed-filter{display:inline-flex;gap:3px;background:var(--surface2);padding:3px;border-radius:var(--r);margin-bottom:1rem}
+.feed-fbtn{padding:5px 12px;border-radius:7px;font-size:11px;cursor:pointer;color:var(--text2);border:none;background:none;font-family:inherit;transition:all .15s var(--ease)}
+.feed-fbtn.on{background:var(--surface);color:var(--text);font-weight:500;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+
+/* LANG SWITCHER */
+.lang-sw{position:relative}
+.lang-btn{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:11px;font-weight:500;color:var(--text2);transition:all .15s var(--ease);font-family:inherit}
+.lang-btn:hover{background:var(--bg);box-shadow:var(--s1)}
+.lang-dd{position:absolute;top:calc(100% + 6px);right:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--s3);z-index:20;display:none;overflow:hidden;min-width:180px}
+.lang-dd.on{display:block}
+.lang-item{display:flex;align-items:center;gap:10px;padding:9px 14px;font-size:12px;cursor:pointer;transition:background .1s var(--ease);border-bottom:1px solid var(--border)}
+.lang-item:last-child{border-bottom:none}
+.lang-item:hover{background:var(--bg)}
+.lang-item.on{background:var(--green-pale);font-weight:500;color:var(--green)}
+.lang-flag{font-size:16px;line-height:1}
+.lang-item-sub{font-size:10px;color:var(--text3);font-weight:400}
+
+/* ROI METER */
+.roi-meter{height:8px;border-radius:4px;overflow:hidden;background:var(--surface2)}
+.roi-meter-fill{height:100%;border-radius:4px;transition:width .6s var(--ease)}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.35);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:1rem}
+.modal-bg.on{display:flex}
+.modal{background:var(--surface);border-radius:var(--r-xl);box-shadow:var(--s3);width:100%;max-width:500px;max-height:90vh;overflow-y:auto;animation:fadeUp .25s var(--ease)}
+.modal-h{display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;border-bottom:1px solid var(--border)}
+.modal-h h2{font-family:'Playfair Display',serif;font-size:17px;font-weight:500;letter-spacing:-.2px}
+.modal-close{width:30px;height:30px;border-radius:50%;border:none;background:var(--surface2);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;color:var(--text2);transition:all .15s var(--ease)}
+.modal-close:hover{background:var(--border2);color:var(--text)}
+.modal-body{padding:1.25rem 1.5rem}
+.modal-foot{padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
+
+/* NOTIFICATIONS */
+.notif-btn{position:relative;width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;transition:all .15s var(--ease)}
+.notif-btn:hover{background:var(--bg);box-shadow:var(--s1)}
+.notif-dot{position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:var(--red-mid);border:2px solid var(--surface)}
+.notif-panel{position:absolute;top:calc(100% + 8px);right:0;width:340px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--s3);z-index:20;display:none;overflow:hidden}
+.notif-panel.on{display:block}
+.notif-panel-h{padding:12px 16px;border-bottom:1px solid var(--border);font-size:12px;font-weight:500;display:flex;justify-content:space-between;align-items:center}
+.notif-item{display:flex;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);font-size:12px;cursor:pointer;transition:background .1s}
+.notif-item:hover{background:var(--bg)}
+.notif-item:last-child{border-bottom:none}
+.notif-item.unread{background:var(--blue)}
+.notif-ico{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+
+/* SEARCH */
+.search-box{display:flex;align-items:center;gap:6px;padding:5px 12px;border:1px solid var(--border);border-radius:20px;background:var(--bg);transition:all .2s var(--ease);width:180px}
+.search-box:focus-within{border-color:var(--green-mid);background:var(--surface);box-shadow:0 0 0 3px rgba(16,185,129,.1);width:240px}
+.search-box input{border:none;background:none;outline:none;font-family:inherit;font-size:12px;color:var(--text);width:100%}
+.search-box input::placeholder{color:var(--text3)}
+
+/* COMPLETION RING */
+.compl-ring{position:relative;width:36px;height:36px;flex-shrink:0}
+.compl-ring svg{transform:rotate(-90deg)}.compl-ring .bg{fill:none;stroke:var(--border);stroke-width:3}.compl-ring .fg{fill:none;stroke-width:3;stroke-linecap:round;transition:stroke-dashoffset .8s var(--ease)}
+.compl-ring .txt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700}
+
+/* UPLOAD ZONE */
+.drop-zone{border:2px dashed var(--border2);border-radius:var(--r-lg);padding:2rem;text-align:center;cursor:pointer;transition:all .2s var(--ease)}
+.drop-zone:hover{border-color:var(--green-mid);background:var(--green-pale)}
+
+/* LOGIN */
+.login-wrap{position:fixed;inset:0;z-index:500;background:var(--bg);display:flex;align-items:center;justify-content:center;transition:opacity .4s var(--ease),visibility .4s}
+.login-wrap.hidden{opacity:0;visibility:hidden;pointer-events:none}
+.login{width:100%;max-width:480px;padding:2rem}
+.login-logo{font-family:'Playfair Display',serif;font-size:32px;font-weight:600;text-align:center;margin-bottom:6px;letter-spacing:-.5px}
+.login-logo em{font-style:normal;color:var(--green-mid)}
+.login-sub{text-align:center;font-size:13px;color:var(--text2);margin-bottom:2.5rem;line-height:1.5}
+.login-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);padding:2rem;box-shadow:var(--s2);margin-bottom:1rem}
+.login-divider{display:flex;align-items:center;gap:12px;margin:1.25rem 0;font-size:11px;color:var(--text3)}
+.login-divider::before,.login-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.login-method{display:flex;align-items:center;gap:14px;padding:14px 18px;border:1px solid var(--border);border-radius:var(--r-lg);cursor:pointer;transition:all .2s var(--ease);margin-bottom:10px;background:var(--surface)}
+.login-method:hover{border-color:var(--green-mid);box-shadow:var(--s2);transform:translateY(-1px)}
+.login-method:active{transform:translateY(0)}
+.login-method-icon{width:44px;height:44px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.login-method-title{font-size:13px;font-weight:600;margin-bottom:1px}
+.login-method-desc{font-size:11px;color:var(--text3);line-height:1.4}
+.login-method.recommended{border-color:var(--green-soft);background:var(--green-pale)}
+.login-method.recommended .login-method-icon{background:var(--green);color:#ecfdf5}
+.login-form{display:none}
+.login-form.visible{display:block}
+.login-error{background:var(--red);color:var(--red-text);font-size:11px;padding:8px 12px;border-radius:var(--r);margin-bottom:10px;display:none;line-height:1.5}
+.login-error.show{display:block}
+.login-footer{text-align:center;font-size:11px;color:var(--text3);line-height:1.7}
+.login-footer a{color:var(--green-mid);text-decoration:none;font-weight:500}
+.session-tag{display:flex;align-items:center;gap:6px;font-size:10px;padding:4px 10px;border-radius:20px;font-weight:500;cursor:pointer;transition:all .15s var(--ease)}
+.session-tag:hover{opacity:.8}
+.session-cert{background:var(--green-pale);color:var(--green-text)}
+.session-clave{background:var(--blue);color:var(--blue-text)}
+.session-pass{background:var(--surface2);color:var(--text2)}
+
+/* RESPONSIVE */
+@media(max-width:1024px){.g4{grid-template-columns:1fr 1fr}.g3,.g2{grid-template-columns:1fr}.m210-meta{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:768px){
+  .sb{position:fixed;left:0;top:0;transform:translateX(-100%);box-shadow:var(--s3)}.sb.open{transform:none}
+  .ham{display:flex}.top{padding:.9rem 1rem}.pg{padding:1.3rem 1rem}.g4{grid-template-columns:1fr 1fr}
+  .f2{grid-template-columns:1fr}.stabs{flex-wrap:wrap}.lock{flex-direction:column;text-align:center}
+  .lock .b{margin-left:0!important}.m210-top{flex-direction:column;gap:8px}
+}
+@media(max-width:480px){.g4{grid-template-columns:1fr}.top-r .bl{display:none}}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ LOGIN SCREEN ══════════════ -->
+<div class="login-wrap" id="loginWrap">
+  <div class="login">
+    <div class="login-logo">Resid<em>IA</em></div>
+    <div class="login-sub">Plataforma fiscal para no residentes con inmuebles en España</div>
+
+    <div class="login-card">
+      <div style="font-size:13px;font-weight:500;margin-bottom:14px">Accede a tu panel fiscal</div>
+
+      <!-- MÉTODO 1: Certificado digital -->
+      <div class="login-method recommended" onclick="loginCert()">
+        <div class="login-method-icon" style="background:var(--green);color:#ecfdf5">🔐</div>
+        <div style="flex:1">
+          <div class="login-method-title">Certificado digital</div>
+          <div class="login-method-desc">FNMT, DNIe o certificado cualificado · Acceso a presentaciones AEAT</div>
+        </div>
+        <span class="bd bd-g" style="flex-shrink:0">Recomendado</span>
+      </div>
+
+      <!-- MÉTODO 2: Cl@ve -->
+      <div class="login-method" onclick="loginClave()">
+        <div class="login-method-icon" style="background:var(--blue);color:var(--blue-text)">🏛️</div>
+        <div style="flex:1">
+          <div class="login-method-title">Cl@ve PIN / Cl@ve permanente</div>
+          <div class="login-method-desc">Sistema de identificación de la Administración española</div>
+        </div>
+      </div>
+
+      <div class="login-divider">o accede con tus credenciales</div>
+
+      <!-- MÉTODO 3: NIE + contraseña -->
+      <div id="loginFormToggle" class="login-method" onclick="showLoginForm()" style="margin-bottom:0">
+        <div class="login-method-icon" style="background:var(--surface2);color:var(--text2)">👤</div>
+        <div style="flex:1">
+          <div class="login-method-title">NIE + Contraseña</div>
+          <div class="login-method-desc">Acceso básico · Sin presentación directa ante AEAT</div>
+        </div>
+      </div>
+
+      <!-- Formulario NIE (oculto inicialmente) -->
+      <div class="login-form" id="loginForm">
+        <div style="padding:16px 0 0">
+          <div id="loginError" class="login-error">⛔ NIE o contraseña incorrectos. Por defecto, tu NIE es tu usuario y contraseña.</div>
+          <div class="fg">
+            <label class="fl">NIE / NIF</label>
+            <input class="fi" id="loginNie" placeholder="X1234567A" autocomplete="username"/>
+            <span class="fh">Tu NIE español es tu identificador de acceso</span>
+          </div>
+          <div class="fg">
+            <label class="fl">Contraseña</label>
+            <input class="fi" id="loginPass" type="password" placeholder="••••••••" autocomplete="current-password"/>
+            <span class="fh">Por defecto: tu NIE · Cámbiala en Perfil fiscal</span>
+          </div>
+          <button class="b b-g" style="width:100%;justify-content:center;padding:11px;font-size:13px;margin-top:4px" onclick="loginPassword()">Acceder</button>
+          <button class="b b-ghost" style="width:100%;justify-content:center;margin-top:6px;font-size:11px" onclick="hideLoginForm()">← Volver a métodos de acceso</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="login-footer">
+      ¿No tienes cuenta? <a href="#" onclick="event.preventDefault();quickRegister()">Regístrate en 2 minutos</a><br/>
+      ResidIA S.L. · Datos protegidos conforme al RGPD
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="ov" onclick="closeSb()"></div>
+
+<aside class="sb" id="sb" role="navigation" aria-label="Menú principal">
+  <div class="sb-logo">Resid<em>IA</em> <span class="sb-logo-tag">BETA</span></div>
+  <div class="sb-user">
+    <div class="compl-ring" id="complRing" title="Perfil completado"></div>
+    <div><div class="sb-name">Johan Henriksson</div><div class="sb-meta" id="sbMeta">🇸🇪 Suecia · UE · IRNR 19%</div></div>
+  </div>
+
+  <div class="sb-sect">General</div>
+  <nav class="sb-nav">
+    <button class="sb-btn on" data-pg="resumen">📊 Resumen</button>
+    <button class="sb-btn" data-pg="perfil">👤 Perfil fiscal</button>
+    <button class="sb-btn" data-pg="inmuebles">🏠 Mis inmuebles</button>
+    <button class="sb-btn" data-pg="simulador">🧮 Simulador fiscal <span class="pill" style="background:var(--green-pale);color:var(--green-text)">NEW</span></button>
+  </nav>
+
+  <div class="sb-sect">Actividad económica</div>
+  <nav class="sb-nav">
+    <button class="sb-btn locked" data-pg="ingresos">💰 Ingresos y reservas <span class="lock-ico">🔒</span></button>
+    <button class="sb-btn locked" data-pg="calendario">📅 Calendario <span class="lock-ico">🔒</span></button>
+    <button class="sb-btn locked" data-pg="gastos">🧾 Gastos y facturas <span class="lock-ico">🔒</span></button>
+  </nav>
+
+  <div class="sb-sect">Gestión</div>
+  <nav class="sb-nav">
+    <button class="sb-btn" data-pg="documentos">🗂️ Documentos</button>
+    <button class="sb-btn" data-pg="actividad-feed">📱 Actividad</button>
+    <button class="sb-btn" data-pg="plan">💳 Mi plan <span class="pill" style="background:var(--amber);color:var(--amber-dk)">PRO</span></button>
+  </nav>
+
+  <div class="sb-sect">Herramientas</div>
+  <nav class="sb-nav">
+    <button class="sb-btn" data-pg="simulador">🧮 Simulador fiscal</button>
+    <button class="sb-btn" data-pg="rentabilidad">📈 Rentabilidad</button>
+  </nav>
+
+  <div class="sb-foot" id="sbFoot"></div>
+</aside>
+
+<main class="main">
+<div class="top">
+  <div style="display:flex;align-items:center;gap:12px">
+    <button class="ham" onclick="openSb()"><span></span><span></span><span></span></button>
+    <h1 id="topTitle">Resumen</h1>
+  </div>
+  <div class="top-r">
+    <div class="lang-sw" id="langSw">
+      <button class="lang-btn" onclick="toggleLangMenu()" id="langBtn">🇪🇸 ES ▾</button>
+      <div class="lang-dd" id="langDd">
+        <div class="lang-item on" onclick="setLang('es')"><span class="lang-flag">🇪🇸</span><div>Español<div class="lang-item-sub">Idioma por defecto</div></div></div>
+        <div class="lang-item" onclick="setLang('en')"><span class="lang-flag">🇬🇧</span><div>English<div class="lang-item-sub">International</div></div></div>
+        <div class="lang-item" onclick="setLang('sv')"><span class="lang-flag">🇸🇪</span><div>Svenska<div class="lang-item-sub">Baserat på din profil</div></div></div>
+        <div class="lang-item" onclick="setLang('de')"><span class="lang-flag">🇩🇪</span><div>Deutsch<div class="lang-item-sub">Für Eigentümer aus DACH</div></div></div>
+        <div class="lang-item" onclick="setLang('fr')"><span class="lang-flag">🇫🇷</span><div>Français<div class="lang-item-sub">Pour propriétaires francophones</div></div></div>
+        <div class="lang-item" onclick="setLang('nl')"><span class="lang-flag">🇳🇱</span><div>Nederlands<div class="lang-item-sub">Voor Nederlandse eigenaren</div></div></div>
+        <div class="lang-item" onclick="setLang('no')"><span class="lang-flag">🇳🇴</span><div>Norsk<div class="lang-item-sub">For norske eiere</div></div></div>
+        <div class="lang-item" onclick="setLang('da')"><span class="lang-flag">🇩🇰</span><div>Dansk<div class="lang-item-sub">For danske ejere</div></div></div>
+        <div class="lang-item" onclick="setLang('it')"><span class="lang-flag">🇮🇹</span><div>Italiano<div class="lang-item-sub">Per proprietari italiani</div></div></div>
+        <div class="lang-item" onclick="setLang('pt')"><span class="lang-flag">🇵🇹</span><div>Português<div class="lang-item-sub">Para proprietários portugueses</div></div></div>
+      </div>
+    </div>
+    <div class="search-box" id="searchBox">
+      <span style="font-size:13px;color:var(--text3)">🔍</span>
+      <input type="text" placeholder="Buscar inmueble, documento..." id="searchInput" oninput="handleSearch(this.value)" onkeydown="if(event.key==='Escape'){this.value='';handleSearch('')}"/>
+    </div>
+    <div id="sessionTag" style="display:none"></div>
+    <div style="position:relative">
+      <div class="notif-btn" onclick="toggleNotifs()">
+        🔔<div class="notif-dot" id="notifDot"></div>
+      </div>
+      <div class="notif-panel" id="notifPanel"></div>
+    </div>
+    <button class="b b-s" onclick="go('plan')">💳 <span class="bl">Plan</span></button>
+    <button class="b b-s b-ghost" onclick="logout()" title="Cerrar sesión" style="font-size:14px;padding:5px 8px">⏻</button>
+  </div>
+</div>
+
+<!-- ══════════════ RESUMEN ══════════════ -->
+<div class="pg on" id="pg-resumen">
+  <!-- KPIs rendered by JS -->
+  <div class="g4" id="kpiGrid"></div>
+
+  <!-- Urgent action -->
+  <div id="urgentAlert"></div>
+
+  <!-- Lock banner (hidden in dev mode via CSS) -->
+  <div class="lock" id="lockBanner">
+    <div style="font-size:24px;flex-shrink:0">🔒</div>
+    <div>
+      <div style="font-size:13px;font-weight:500;color:var(--amber-dk)">Actividad económica bloqueada</div>
+      <div style="font-size:12px;color:var(--amber-text);margin-top:2px;line-height:1.5">Activa el plan anual para gestionar reservas, Booking, Airbnb, gastos deducibles e informes de rentabilidad.</div>
+    </div>
+    <button class="b b-g b-s" style="margin-left:auto;flex-shrink:0" onclick="go('plan')">Ver plan →</button>
+  </div>
+
+  <div class="g2">
+    <!-- Inmuebles summary rendered by JS -->
+    <div class="c" id="resumenInmuebles"></div>
+
+    <!-- Global checklist rendered by JS -->
+    <div class="c" id="resumenChecklist"></div>
+  </div>
+</div>
+
+<!-- ══════════════ PERFIL FISCAL ══════════════ -->
+<div class="pg" id="pg-perfil">
+  <div class="al al-i">ℹ️ <div><b>Datos del Modelo 210</b>Completa todos los campos. ResidIA los usa para preparar y presentar tu declaración ante la AEAT.</div></div>
+  <div class="g2">
+    <div class="c">
+      <div class="sec">Identificación</div>
+      <div class="f2">
+        <div class="fg"><label class="fl">Nombre completo</label><input class="fi" value="Johan Erik Henriksson"/></div>
+        <div class="fg"><label class="fl">NIE español</label><input class="fi" placeholder="X1234567A"/><span class="fh">⚠ Obligatorio para el M210</span></div>
+        <div class="fg"><label class="fl">Pasaporte / DNI origen</label><input class="fi" value="SE-AB123456"/></div>
+        <div class="fg"><label class="fl">Fecha de nacimiento</label><input class="fi" type="date" value="1975-03-15"/></div>
+      </div>
+      <div class="hr"></div>
+      <div class="sec">Residencia fiscal</div>
+      <div class="f2">
+        <div class="fg"><label class="fl">País de residencia</label><select class="fi"><option selected>Suecia (UE) — 19%</option><option>Alemania (UE) — 19%</option><option>Francia (UE) — 19%</option><option>Reino Unido — 19%</option><option>EE.UU. — 24%</option><option>Fuera UE — 24%</option></select></div>
+        <div class="fg"><label class="fl">Certificado residencia fiscal</label><select class="fi"><option>Sí, vigente</option><option selected>Pendiente de aportar</option><option>No tengo</option></select></div>
+        <div class="fg"><label class="fl">Dirección en el extranjero</label><input class="fi" value="Storgatan 14, Estocolmo"/></div>
+        <div class="fg"><label class="fl">Código postal</label><input class="fi" value="11122"/></div>
+      </div>
+      <div class="hr"></div>
+      <div class="sec">Cuenta bancaria (devoluciones AEAT)</div>
+      <div class="f2">
+        <div class="fg"><label class="fl">IBAN</label><input class="fi" placeholder="ES12 3456 7890..."/></div>
+        <div class="fg"><label class="fl">Titular</label><input class="fi" value="Johan Erik Henriksson"/></div>
+      </div>
+      <button class="b b-g" style="width:100%;justify-content:center;padding:10px" onclick="saveProfile()">💾 Guardar perfil</button>
+    </div>
+    <div>
+      <div class="c" style="background:var(--green-pale);border-color:var(--green-soft)">
+        <div style="font-size:12px;font-weight:500;color:var(--green);margin-bottom:10px">Tu situación fiscal</div>
+        <div id="fiscalSummary"></div>
+      </div>
+      <div class="c">
+        <div style="font-size:12px;font-weight:500;margin-bottom:8px">Representante fiscal</div>
+        <div style="font-size:12px;color:var(--text2);line-height:1.7" id="perfilAsesor"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ INMUEBLES ══════════════ -->
+<div class="pg" id="pg-inmuebles">
+  <div class="tabs" id="propTabs"></div>
+  <div id="propContent"></div>
+</div>
+
+<!-- ══════════════ ACTIVIDAD LOCK ══════════════ -->
+<div class="pg" id="pg-actividad">
+  <div style="text-align:center;padding:4rem 2rem;max-width:480px;margin:0 auto">
+    <div style="font-size:48px;margin-bottom:1.25rem">🔒</div>
+    <div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:500;margin-bottom:.75rem">Activa el plan anual</div>
+    <div style="font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:2rem">Gestión de reservas Booking/Airbnb, calendario de ocupación, gastos deducibles e informes de rentabilidad.</div>
+    <div class="c" style="text-align:left;margin-bottom:1.5rem" id="actividadPricing"></div>
+    <button class="b b-g" style="width:100%;justify-content:center;padding:12px;font-size:14px" onclick="go('plan')">Ver plan y contratar →</button>
+    <div style="font-size:11px;color:var(--text3);margin-top:1rem">Sin permanencia · Cancela cuando quieras</div>
+  </div>
+</div>
+
+<!-- ══════════════ INGRESOS (dev) ══════════════ -->
+<div class="pg" id="pg-ingresos">
+  <div class="al al-i">🛠️ <div><b>Modo desarrollador</b>Datos de prueba. En producción requiere plan anual.</div></div>
+  <div class="g4" id="ingresosKpi"></div>
+  <div class="g2" id="ingresosContent"></div>
+</div>
+
+<!-- ══════════════ CALENDARIO (dev) ══════════════ -->
+<div class="pg" id="pg-calendario">
+  <div class="al al-i">🛠️ <div><b>Modo desarrollador</b>Calendario de ejemplo. En producción se sincroniza con Booking/Airbnb.</div></div>
+  <div class="g2" id="calContent"></div>
+</div>
+
+<!-- ══════════════ GASTOS (dev) ══════════════ -->
+<div class="pg" id="pg-gastos">
+  <div class="al al-i">🛠️ <div><b>Modo desarrollador</b>Datos de gastos de ejemplo.</div></div>
+  <div class="g4" style="grid-template-columns:repeat(3,1fr)" id="gastosKpi"></div>
+  <div class="g2" id="gastosContent"></div>
+</div>
+
+<!-- ══════════════ DOCUMENTOS ══════════════ -->
+<div class="pg" id="pg-documentos">
+  <div class="g2" style="align-items:start">
+    <div id="docCats"></div>
+    <div id="docTable"></div>
+  </div>
+</div>
+
+<!-- ══════════════ SIMULADOR FISCAL ══════════════ -->
+<div class="pg" id="pg-simulador">
+  <div id="simContent"></div>
+</div>
+
+<!-- ══════════════ MI PLAN ══════════════ -->
+<div class="pg" id="pg-plan">
+  <div id="planContent"></div>
+</div>
+
+<!-- ══════════════ SIMULADOR FISCAL ══════════════ -->
+<div class="pg" id="pg-simulador">
+  <div id="simContent"></div>
+</div>
+
+<!-- ══════════════ RENTABILIDAD ══════════════ -->
+<div class="pg" id="pg-rentabilidad">
+  <div id="rentContent"></div>
+</div>
+
+<!-- ══════════════ ACTIVIDAD / FEED ══════════════ -->
+<div class="pg" id="pg-actividad-feed">
+  <div id="feedContent"></div>
+</div>
+
+</main>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modal"></div>
+</div>
+
+<div class="dev-btn" id="devBtn" onclick="toggleDev()"><div class="dev-dot"></div><span id="devLbl">Dev</span><div class="dev-sw"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════
+//  SINGLE SOURCE OF TRUTH — All data lives here
+// ═══════════════════════════════════════════════════
+const D = {
+  user: { name:'Johan Erik Henriksson', initials:'JH', country:'Suecia', zone:'UE', rate:19, nie:null, passport:'SE-AB123456', aeatAccess:false, addr:'Storgatan 14, 11122 Estocolmo' },
+  company: { name:'ResidIA S.L.', cif:'B-98765432', addr:'Calle Innovación 8, 3ºB · 29601 Marbella', email:'soporte@residia.es', tel:'+34 952 123 456' },
+  asesor: { name:'García & Asociados', role:'Asesor fiscal asignado', city:'Marbella', schedule:'L–V 9:00–18:00' },
+  fiscal: [
+    {label:'Tipo IRNR', val:'19% (UE/EEE)'},
+    {label:'Gastos deducibles', val:'Sí'},
+    {label:'Modelo aplicable', val:'M210 anual'},
+    {label:'Plazo alquiler (T35)', val:'20 ene año sig.'},
+    {label:'Plazo imputada (T2)', val:'31 dic año sig.'},
+    {label:'CDI España–Suecia', val:'Vigente'}
+  ],
+  props: [
+    {
+      id:0, icon:'🏠', name:'Apto. Estepona', type:'Apartamento', city:'Estepona',
+      addr:'Calle Real 14, 2ºA · 29680', ref:'0123ABC4567DEF', pct:100,
+      vc:98450, tipImp:1.1, revYear:2015, uso:'Alquiler vacacional',
+      diasAlq:187, diasImp:178, valAdq:210000, ibi:380, comunidad:720, seguro:280,
+      alquiler:{
+        tipo:'turistico',        // turistico | larga_estancia | mixto
+        licencia:'VFT/MA/01234', // licencia turística
+        servicios:false,         // false=sin servicios hoteleros (exento IVA) | true=con servicios (IVA 10%)
+        ccaa:'Andalucía'
+      },
+      decl:[
+        {tipo:'T35',label:'Alquiler',year:2024,estado:'urgent',cuota:2926,base:15400,plazo:'20 ene 2025',
+          steps:[{s:'done',t:'Ingresos recopilados'},{s:'done',t:'Gastos calculados'},{s:'now',t:'Tu autorización'},{s:'wait',t:'Presentar AEAT'},{s:'wait',t:'Archivado'}],
+          desc:'Rendimientos alquiler vacacional · UE · 19%'},
+        {tipo:'T2',label:'Imputada',year:2024,estado:'prep',cuota:39,base:null,plazo:'31 dic 2025',
+          steps:[{s:'done',t:'Días calculados'},{s:'done',t:'Base calculada'},{s:'wait',t:'Autorización'},{s:'wait',t:'Presentar AEAT'},{s:'wait',t:'Archivado'}],
+          desc:'Renta imputada por días sin alquiler · Apto. Estepona'}
+      ],
+      declHist:[
+        {tipo:'T35',label:'Alquiler 2023',cuota:1843,fecha:'15 ene 2024'},
+        {tipo:'T2',label:'Imputada 2023',cuota:47,fecha:'20 dic 2023'}
+      ],
+      checklist:{
+        declarante:{total:8,ok:5,items:[
+          {ok:false,t:'NIE / NIF español',d:'Casilla 01 · Obligatorio'},
+          {ok:true,t:'Nombre y apellidos',d:'Johan Erik Henriksson'},
+          {ok:true,t:'País residencia fiscal',d:'Suecia · Casilla 06'},
+          {ok:true,t:'Tipo IRNR (19%)',d:'UE/EEE · Casilla 14'},
+          {ok:true,t:'Dirección extranjero',d:'Storgatan 14, Estocolmo'},
+          {ok:false,t:'Certificado residencia fiscal',d:'Requerido para deducir gastos (UE)'},
+          {ok:true,t:'Representante fiscal',d:'García & Asociados · B-12345678'},
+          {ok:false,t:'IBAN cuenta bancaria',d:'Necesario si resultado a devolver'}
+        ]},
+        inmueble:{total:11,ok:11},
+        docs:{total:5,ok:3,items:[
+          {ok:true,t:'Recibo IBI 2024',d:'Subido · Oct 2024'},
+          {ok:true,t:'Facturas gastos',d:'6 facturas'},
+          {ok:true,t:'Escritura propiedad',d:'Archivada'},
+          {ok:false,t:'Certificado residencia fiscal',d:'Pendiente'},
+          {ok:false,t:'Justificante IBAN',d:'Necesario si devolución'}
+        ]}
+      }
+    },
+    {
+      id:1, icon:'🏡', name:'Villa Mijas', type:'Villa', city:'Mijas',
+      addr:'Urb. El Dorado 5 · 29650', ref:'0789GHI2345JKL', pct:100,
+      vc:210000, tipImp:1.1, revYear:2012, uso:'Uso propio',
+      diasAlq:0, diasImp:365, valAdq:480000, ibi:720, comunidad:1440, seguro:0,
+      decl:[
+        {tipo:'T2',label:'Imputada',year:2024,estado:'prep',cuota:439,base:null,plazo:'31 dic 2025',
+          steps:[{s:'done',t:'Uso propio confirmado'},{s:'done',t:'Base calculada'},{s:'wait',t:'Autorización'},{s:'wait',t:'Presentar AEAT'},{s:'wait',t:'Archivado'}],
+          desc:'Renta imputada por uso propio · Villa Mijas'}
+      ],
+      declHist:[],
+      checklist:{
+        declarante:{total:8,ok:6,items:[
+          {ok:true,t:'Referencia catastral',d:'0789GHI2345JKL'},
+          {ok:true,t:'Valor catastral',d:'210.000 € · 1,1%'},
+          {ok:true,t:'Días uso propio',d:'365'},
+          {ok:true,t:'Tipo renta',d:'Tipo 02'},
+          {ok:true,t:'Periodo devengo',d:'01/01/2024 – 31/12/2024'},
+          {ok:true,t:'Escritura propiedad',d:'Archivada'},
+          {ok:false,t:'Recibo IBI 2024',d:'Pendiente'},
+          {ok:false,t:'NIE español',d:'Completar en perfil'}
+        ]},
+        inmueble:{total:8,ok:6},
+        docs:{total:3,ok:1}
+      }
+    }
+  ],
+  docs:[
+    {n:'📄 Escritura compraventa',prop:'Apto. Estepona',tipo:'Registral',cat:'bd-b',f:'12 mar 2018'},
+    {n:'📋 M210 Tipo 35 · 2023',prop:'Apto. Estepona',tipo:'Fiscal',cat:'bd-g',f:'15 ene 2024'},
+    {n:'🏦 Recibo IBI 2024',prop:'Apto. Estepona',tipo:'IBI',cat:'bd-a',f:'5 oct 2024'},
+    {n:'🧾 Factura comunidad Q3',prop:'Apto. Estepona',tipo:'Gasto',cat:'bd-0',f:'1 oct 2024'},
+    {n:'📄 Escritura compraventa',prop:'Villa Mijas',tipo:'Registral',cat:'bd-b',f:'22 jun 2015'},
+    {n:'🛡️ Seguro hogar 2024',prop:'Villa Mijas',tipo:'Seguro',cat:'bd-0',f:'1 ene 2024'}
+  ],
+  reservas:[
+    {id:'R-2024-047',h:'Klaus Weber',nif:'DE-W123456',tipoArr:'particular_ext',canal:'Booking',cat:'bd-b',fechas:'28 dic – 4 ene',noches:7,pNoche:160,imp:1120,st:'Confirmada',stc:'bd-g',prop:'Apto. Estepona'},
+    {id:'R-2025-001',h:'Marie Dupont',nif:'FR-D789012',tipoArr:'particular_ext',canal:'Airbnb',cat:'bd-p',fechas:'15 – 22 ene',noches:7,pNoche:140,imp:980,st:'Confirmada',stc:'bd-g',prop:'Apto. Estepona'},
+    {id:'R-2025-002',h:'John Smith',nif:'GB-S345678',tipoArr:'particular_ext',canal:'Directo',cat:'bd-0',fechas:'1 – 14 feb',noches:13,pNoche:140,imp:1820,st:'Pendiente pago',stc:'bd-a',prop:'Apto. Estepona'},
+    {id:'R-2025-003',h:'Saga Lindqvist',nif:'SE-L901234',tipoArr:'particular_ext',canal:'Booking',cat:'bd-b',fechas:'20 – 27 feb',noches:7,pNoche:130,imp:910,st:'Confirmada',stc:'bd-g',prop:'Apto. Estepona'},
+    {id:'R-2025-004',h:'Inmobiliaria Costa Sol S.L.',nif:'B-29456789',tipoArr:'empresa_es',canal:'Directo',cat:'bd-0',fechas:'5 – 12 mar',noches:7,pNoche:150,imp:1050,st:'Pendiente',stc:'bd-a',prop:'Apto. Estepona'}
+  ],
+  gastos:[
+    {c:'IBI',v:380},{c:'Comunidad',v:720},{c:'Seguro',v:280},{c:'Limpieza',v:1870},{c:'Reparaciones',v:650},{c:'Suministros',v:380}
+  ],
+  account:{
+    plan:'free', // free | annual
+    since:'2024-09-15',
+    saldo:0, // € en cuenta ResidIA
+    nextPayment:null,
+    payMethod:null,
+    invoices:[
+      {id:'INV-2024-001',date:'15 sep 2024',concept:'Registro cuenta ResidIA',amount:0,status:'ok',pdf:true},
+    ],
+    // When plan=annual, this gets populated:
+    annualPrice:100, // 2 inm × 50€
+    m210Price:10, // 2 mod × 5€
+    m210Pending:[
+      {prop:'Apto. Estepona',tipo:'T35',year:2024,amount:5,status:'pending'},
+      {prop:'Apto. Estepona',tipo:'T2',year:2024,amount:5,status:'pending'},
+      {prop:'Villa Mijas',tipo:'T2',year:2024,amount:5,status:'pending'}
+    ],
+    savedVsGestor:850 // estimated savings vs traditional tax advisor
+  }
+};
+
+// ═══════════════ HELPERS ═══════════════
+const $=s=>document.getElementById(s);
+const $$=s=>document.querySelectorAll(s);
+const fmt=n=>n.toLocaleString('es-ES');
+const titles={resumen:'Resumen',perfil:'Perfil fiscal',inmuebles:'Mis inmuebles',actividad:'Actividad económica',ingresos:'Ingresos y reservas',calendario:'Calendario',gastos:'Gastos y facturas',documentos:'Documentos',plan:'Mi plan',simulador:'Simulador fiscal',rentabilidad:'Rentabilidad','actividad-feed':'Actividad'};
+
+let dev=false, curProp=0, curPropTab='datos';
+
+// ═══════════════ NAVIGATION ═══════════════
+function go(id){
+  if(!dev && ['ingresos','calendario','gastos'].includes(id)){id='actividad'}
+  $$('.pg').forEach(p=>p.classList.remove('on'));
+  $$('.sb-btn').forEach(b=>b.classList.remove('on'));
+  const pg=$('pg-'+id);
+  if(pg){pg.classList.add('on');pg.style.animation='none';pg.offsetHeight;pg.style.animation=''}
+  const btn=document.querySelector(`.sb-btn[data-pg="${id}"]`);
+  if(btn && (!btn.classList.contains('locked')||dev)) btn.classList.add('on');
+  $('topTitle').textContent=t(id);
+  if(id==='plan')renderPlan();
+  if(id==='inmuebles')renderProp();
+  document.querySelector('.main').scrollTo({top:0,behavior:'smooth'});
+  closeSb();
+}
+
+// Sidebar click handler
+document.addEventListener('click',e=>{
+  const btn=e.target.closest('.sb-btn');
+  if(!btn)return;
+  const pg=btn.dataset.pg;
+  if(btn.classList.contains('locked')&&!dev){go('actividad');return}
+  go(pg);
+});
+
+// ═══════════════ RENDER: RESUMEN ═══════════════
+function renderResumen(){
+  const totalIRNR=D.props.reduce((s,p)=>s+p.decl.reduce((a,d)=>a+d.cuota,0),0);
+  const totalDecl=D.props.reduce((s,p)=>s+p.decl.length,0);
+  const urgentDecl=D.props.flatMap(p=>p.decl.filter(d=>d.estado==='urgent'));
+
+  // KPIs
+  $('kpiGrid').innerHTML=`
+    <div class="kpi"><div class="kpi-l">${t('kpi_inm')}</div><div class="kpi-v">${D.props.length}</div><div class="kpi-s up">${t('kpi_registered')}</div></div>
+    <div class="kpi"><div class="kpi-l">${t('kpi_decl')} 2024</div><div class="kpi-v">${totalDecl}</div><div class="kpi-s warn">${t('kpi_managed')}</div></div>
+    <div class="kpi"><div class="kpi-l">${t('kpi_irnr')}</div><div class="kpi-v">${fmt(totalIRNR)} €</div><div class="kpi-s warn">${t('kpi_exercise')} 2024</div></div>
+    <div class="kpi"><div class="kpi-l">${t('kpi_acciones')}</div><div class="kpi-v">${urgentDecl.length}</div><div class="kpi-s ${urgentDecl.length?'err':'up'}">${urgentDecl.length?t('kpi_attention'):t('kpi_ok')}</div></div>`;
+
+  // Urgent
+  if(urgentDecl.length){
+    const d=urgentDecl[0], p=D.props.find(p=>p.decl.includes(d));
+    $('urgentAlert').innerHTML=`<div class="al al-w">⚠️ <div><b>M210 ${d.tipo} · ${p.name} — Vence ${d.plazo}</b>ResidIA está preparando tu declaración. Pendiente de tu autorización.</div><button class="b b-s" style="margin-left:auto;flex-shrink:0" onclick="go('inmuebles')">Ver →</button></div>`;
+  }
+
+  // Inmuebles table
+  let rows=D.props.map(p=>{
+    const irnr=p.decl.reduce((a,d)=>a+d.cuota,0);
+    const st=p.decl.some(d=>d.estado==='urgent')?'<span class="bd bd-a">Pendiente auth.</span>':'<span class="bd bd-0">En prep.</span>';
+    return `<tr onclick="go('inmuebles')" style="cursor:pointer"><td><b>${p.name}</b><br><span style="font-size:10px;color:var(--text2)">VC: ${fmt(p.vc)} € · ${p.tipImp}%</span></td><td>${p.uso}</td><td>${fmt(irnr)} €</td><td>${st}</td></tr>`;
+  }).join('');
+  $('resumenInmuebles').innerHTML=`<div class="c-h"><span class="c-t">${t('my_properties')}</span><button class="b b-s" onclick="go('inmuebles')">${t('view_sheets')} →</button></div><table><thead><tr><th>${t('property')}</th><th>${t('type')}</th><th>IRNR</th><th>${t('status')}</th></tr></thead><tbody>${rows}</tbody></table>`;
+
+  // Global checklist — only pending items across all props
+  let pending=[];
+  D.props.forEach(p=>{
+    if(p.checklist.declarante.items)p.checklist.declarante.items.filter(i=>!i.ok).forEach(i=>pending.push({...i,from:p.name}));
+    if(p.checklist.docs&&p.checklist.docs.items)p.checklist.docs.items.filter(i=>!i.ok).forEach(i=>pending.push({...i,from:p.name}));
+  });
+  // Deduplicate by title
+  const seen=new Set();pending=pending.filter(i=>{if(seen.has(i.t))return false;seen.add(i.t);return true});
+  let ckHtml=pending.map(i=>`<div class="ck"><div class="ck-i ck-w">!</div><div><div style="font-weight:500">${i.t}</div><div style="color:var(--text3);font-size:10px">${i.d}</div></div></div>`).join('');
+  $('resumenChecklist').innerHTML=`<div class="c-h"><span class="c-t">${t('checklist_m210')}</span><span class="bd bd-a">${pending.length} ${t('actions')}</span></div>${ckHtml}<div style="margin-top:.75rem;display:flex;gap:8px;flex-wrap:wrap"><button class="b b-g b-s" onclick="go('perfil')">${t('complete_profile')}</button><button class="b b-s" onclick="go('documentos')">${t('upload_docs')}</button></div>`;
+}
+
+// ═══════════════ RENDER: PERFIL FISCAL SUMMARY ═══════════════
+function renderFiscal(){
+  $('fiscalSummary').innerHTML=D.fiscal.map(f=>`<div class="dr"><span class="dr-l">${f.label}</span><span style="font-weight:500;color:var(--green)">${f.val}</span></div>`).join('');
+}
+
+// ═══════════════ RENDER: INMUEBLE DETAIL ═══════════════
+function renderProp(){
+  const p=D.props[curProp];
+  // Tabs
+  $('propTabs').innerHTML=D.props.map((pr,i)=>`<div class="tab ${i===curProp?'on':''}" onclick="curProp=${i};curPropTab='datos';renderProp()">${pr.icon} ${pr.name}</div>`).join('')+`<div class="tab" style="color:var(--text3)" onclick="openAddPropModal()">＋ Añadir</div>`;
+
+  // Sub-tabs + content
+  let html=`<div class="stabs">
+    <button class="stab ${curPropTab==='datos'?'on':''}" onclick="curPropTab='datos';renderProp()">Datos</button>
+    <button class="stab ${curPropTab==='m210'?'on':''}" onclick="curPropTab='m210';renderProp()">Declaraciones M210 ${p.decl.some(d=>d.estado==='urgent')?'<span style=\"background:var(--amber);color:var(--amber-dk);font-size:9px;padding:1px 5px;border-radius:10px;margin-left:3px\">!</span>':''}</button>
+    <button class="stab ${curPropTab==='check'?'on':''}" onclick="curPropTab='check';renderProp()">Checklist</button>
+  </div>`;
+
+  if(curPropTab==='datos') html+=renderPropDatos(p);
+  else if(curPropTab==='m210') html+=renderPropM210(p);
+  else html+=renderPropCheck(p);
+  $('propContent').innerHTML=html;
+}
+
+function renderPropDatos(p){
+  return `<div class="c">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.3rem;padding-bottom:1rem;border-bottom:1px solid var(--border)">
+      <div><div style="font-family:'Playfair Display',serif;font-size:18px;letter-spacing:-.3px">${p.type} · ${p.city}</div><div style="font-size:12px;color:var(--text2);margin-top:3px">${p.addr} · Ref: ${p.ref} · ${p.pct}%</div></div>
+      <button class="b b-s" onclick="editarInmueble()">✏️ Editar</button>
+    </div>
+    <div class="g3">
+      <div>
+        <div class="sec">Registral</div>
+        <div class="db"><div class="db-l">VALOR CATASTRAL</div><div class="db-v">${fmt(p.vc)} €</div></div>
+        <div class="db"><div class="db-l">TIPO IMPUTACIÓN</div><div class="db-v">${p.tipImp}% · rev. ${p.revYear}</div></div>
+        <div class="db"><div class="db-l">USO</div><div class="db-v">${p.uso}</div></div>
+        ${p.diasAlq?`<div class="db"><div class="db-l">NOCHES ALQUILADAS</div><div class="db-v">${p.diasAlq} noches 2024</div></div>`:''}
+        <div class="db" style="border-bottom:none"><div class="db-l">DÍAS IMPUTADOS</div><div class="db-v">${p.diasImp} días 2024</div></div>
+      </div>
+      <div>
+        <div class="sec">Financiero 2024</div>
+        <div class="dr"><span class="dr-l">Valor adquisición</span><span class="dr-v">${fmt(p.valAdq)} €</span></div>
+        <div class="dr"><span class="dr-l">IBI anual</span><span>${fmt(p.ibi)} €</span></div>
+        <div class="dr"><span class="dr-l">Comunidad</span><span>${fmt(p.comunidad)} €</span></div>
+        ${p.seguro?`<div class="dr"><span class="dr-l">Seguro hogar</span><span>${fmt(p.seguro)} €</span></div>`:''}
+        ${p.diasAlq?`<div class="dr" style="border-bottom:none;font-weight:500"><span>Ingresos alquiler</span><span style="color:var(--green-mid);cursor:pointer" onclick="go('plan')">Activa plan →</span></div>`:''}
+      </div>
+      <div>
+        <div class="sec">Fiscal 2024</div>
+        ${p.decl.map(d=>`<div class="fc" style="background:${d.estado==='urgent'?'var(--amber)':'var(--surface2)'}" onclick="curPropTab='m210';renderProp()">
+          <div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:11px;font-weight:500;color:${d.estado==='urgent'?'var(--amber-dk)':'var(--text2)'}">M210 · ${d.tipo}</span>${d.estado==='urgent'?'<span style=\"font-size:9px;background:rgba(0,0,0,.08);padding:1px 6px;border-radius:20px;color:var(--amber-dk)\">⏰ Urgente</span>':''}</div>
+          <div style="display:flex;justify-content:space-between"><span style="font-size:10px;color:var(--text3)">Cuota</span><span style="font-size:17px;font-weight:600;color:${d.estado==='urgent'?'var(--amber-dk)':'var(--text2)'}">${fmt(d.cuota)} €</span></div>
+          <div style="font-size:10px;color:var(--text3);margin-top:2px">Plazo: ${d.plazo}</div>
+        </div>`).join('')}
+        ${!p.diasAlq?`<div style="background:var(--blue);border-radius:var(--r);padding:.75rem"><div style="font-size:11px;font-weight:500;color:var(--blue-text);margin-bottom:2px">Sin alquiler</div><div style="font-size:11px;color:var(--blue-text)">Solo Tipo 2 (imputada)</div></div>`:''}
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderPropM210(p){
+  let html=`<div style="background:var(--green);border-radius:var(--r-xl);padding:1.1rem 1.4rem;margin-bottom:1.3rem;display:flex;align-items:center;gap:12px;box-shadow:0 4px 16px rgba(6,78,59,.2)">
+    <span style="font-size:20px">🛡️</span>
+    <div><div style="font-size:13px;font-weight:500;color:#ecfdf5">ResidIA gestiona tus declaraciones</div><div style="font-size:11px;color:var(--green-soft)">Te avisamos en cada paso y pedimos autorización antes de presentar.</div></div>
+  </div>`;
+
+  p.decl.forEach(d=>{
+    const cls=d.estado==='urgent'?'urgent':d.estado==='done'?'done':'prep';
+    html+=`<div class="m210-hero ${cls}">
+      <div class="m210-top">
+        <div><div class="m210-label" style="color:${d.estado==='urgent'?'var(--red-text)':'var(--text3)'}">M210 · ${d.tipo} · ${d.label} ${d.year}</div><div class="m210-title">${d.desc}</div></div>
+        <div style="text-align:right"><div style="font-size:10px;color:var(--text3)">Cuota IRNR</div><div class="m210-amt" style="color:${d.estado==='urgent'?'var(--red-text)':'var(--text)'}">${fmt(d.cuota)} €</div></div>
+      </div>
+      <div class="m210-body">
+        <div class="tl">${d.steps.map((st,i)=>{
+          let dot=`<div class="tl-s"><div class="tl-d ${st.s==='done'?'done':st.s==='now'?'now':'wait'}">${st.s==='done'?'✓':st.s==='now'?'●':i+1}</div><div class="tl-lb ${st.s==='done'?'done':st.s==='now'?'now':''}">${st.t}</div></div>`;
+          if(i<d.steps.length-1){const lnCls=d.steps[i+1].s==='done'||st.s==='done'&&d.steps[i+1].s==='now'?'done':'wait';dot+=`<div class="tl-ln ${lnCls}"></div>`}
+          return dot;
+        }).join('')}</div>
+        ${d.base?`<dl class="m210-meta" style="background:var(--surface2);border-radius:var(--r);padding:.85rem">
+          <div><dt>Base imponible</dt><dd>${fmt(d.base)} €</dd></div>
+          <div><dt>Tipo IRNR</dt><dd>${D.user.rate}%</dd></div>
+          <div><dt>Cuota</dt><dd style="color:var(--red-text)">${fmt(d.cuota)} €</dd></div>
+          <div><dt>Plazo</dt><dd>${d.plazo}</dd></div>
+        </dl>`:`<div style="font-size:11px;color:var(--text2);background:var(--surface2);border-radius:var(--r);padding:8px 12px">Plazo: <b style="color:var(--text)">${d.plazo}</b>. Sin urgencia.</div>`}
+        ${d.estado==='urgent'?`<div class="m210-actions" style="margin-top:1rem">
+          <button class="b b-g b-s" onclick="${`D.user.aeatAccess?toast('Presentación autorizada — ResidIA procederá a presentar ante la AEAT','ok'):toast('⚠️ Necesitas acceder con certificado digital o Cl@ve para autorizar la presentación ante la AEAT','w')`}">✓ Autorizar presentación</button>
+          <button class="b b-s" onclick="verBorrador()">📄 Ver borrador</button><button class="b b-s" onclick="contactAsesor()">💬 Contactar asesor</button>
+          ${`</div><div style="font-size:10px;margin-top:6px;color:${D.user.aeatAccess?'var(--green-text)':'var(--amber-text)'}">${D.user.aeatAccess?'🔐 Sesión con certificado — presentación directa habilitada':'⚠️ Accede con certificado digital o Cl@ve para poder autorizar la presentación'}</div>`}`:''}
+      </div>
+    </div>`;
+  });
+
+  if(p.declHist.length){
+    html+=`<div style="margin-top:.5rem"><button class="b b-ghost b-s" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">📁 Ver ejercicio 2023</button><div style="display:none;margin-top:.75rem">`;
+    p.declHist.forEach(h=>{
+      html+=`<div class="m210-hero done" style="opacity:.7"><div class="m210-top" style="padding-bottom:1rem"><div><div class="m210-label" style="color:var(--green-text)">M210 · ${h.tipo} · ${h.label}</div><div style="font-size:12px;color:var(--text2)">Cuota pagada: ${fmt(h.cuota)} €</div></div><div><span class="bd bd-g">✓ Presentado ${h.fecha}</span></div></div></div>`;
+    });
+    html+=`</div></div>`;
+  }
+  return html;
+}
+
+function renderPropCheck(p){
+  const cl=p.checklist;
+  let html='<div class="g2">';
+  // Declarante
+  if(cl.declarante.items){
+    html+=`<div class="c"><div class="c-h"><span class="c-t">Datos declarante</span><span class="bd ${cl.declarante.ok===cl.declarante.total?'bd-g':'bd-a'}">${cl.declarante.ok}/${cl.declarante.total}</span></div>${cl.declarante.items.map(i=>`<div class="ck"><div class="ck-i ${i.ok?'ck-ok':'ck-w'}">${i.ok?'✓':'!'}</div><div><div style="font-weight:500">${i.t}</div><div style="color:var(--text3);font-size:10px">${i.d}</div></div></div>`).join('')}<button class="b b-g b-s" style="margin-top:.75rem" onclick="go('perfil')">Completar perfil →</button></div>`;
+  }
+  // Docs
+  if(cl.docs&&cl.docs.items){
+    html+=`<div class="c"><div class="c-h"><span class="c-t">Documentación</span><span class="bd ${cl.docs.ok===cl.docs.total?'bd-g':'bd-a'}">${cl.docs.ok}/${cl.docs.total}</span></div>${cl.docs.items.map(i=>`<div class="ck"><div class="ck-i ${i.ok?'ck-ok':'ck-w'}">${i.ok?'✓':'!'}</div><div><div style="font-weight:500">${i.t}</div><div style="color:var(--text3);font-size:10px">${i.d}</div></div></div>`).join('')}<button class="b b-g b-s" style="margin-top:.75rem" onclick="go('documentos')">Subir documentos →</button></div>`;
+  }
+  html+='</div>';
+  return html;
+}
+
+// ═══════════════ RENDER: DOCUMENTOS ═══════════════
+function renderDocs(filter){
+  const catMap={'📋 Todos':null,'🏛️ Escrituras':'Registral','📋 Modelos 210':'Fiscal','🏦 IBI y tasas':'IBI','🧾 Facturas':'Gasto','🛡️ Seguros':'Seguro'};
+  const cats=[{n:'📋 Todos',c:D.docs.length},{n:'🏛️ Escrituras',c:2},{n:'📋 Modelos 210',c:3},{n:'🏦 IBI y tasas',c:3},{n:'🧾 Facturas',c:4},{n:'🛡️ Seguros',c:2}];
+  const activeFilter=filter||null;
+  $('docCats').innerHTML=`<div style="font-size:13px;font-weight:500;margin-bottom:.75rem">Categorías</div><div style="display:flex;flex-direction:column;gap:4px">${cats.map(c=>{const isOn=catMap[c.n]===activeFilter||(activeFilter===null&&c.n==='📋 Todos');return`<div class="dc ${isOn?'on':''}" onclick="renderDocs(${catMap[c.n]?`'${catMap[c.n]}'`:'null'})"><span style="font-size:12px;${isOn?'font-weight:500;color:var(--green)':'color:var(--text2)'}">${c.n}</span><span class="bd ${isOn?'bd-g':'bd-0'}">${c.c}</span></div>`}).join('')}</div>`;
+
+  const filtered=activeFilter?D.docs.filter(d=>d.tipo===activeFilter):D.docs;
+
+  let rows=filtered.map(d=>`<tr><td>${d.n}</td><td>${d.prop}</td><td><span class="bd ${d.cat}">${d.tipo}</span></td><td>${d.f}</td><td><button class="b b-s" onclick="toast('📥 Descargando ${d.tipo.toLowerCase()}...','ok')">⬇</button></td></tr>`).join('');
+  $('docTable').innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem"><div style="font-size:13px;font-weight:500">Documentos (${filtered.length})</div><button class="b b-s b-g" onclick="openUploadModal()">+ Subir</button></div><table><thead><tr><th>Nombre</th><th>Inmueble</th><th>Tipo</th><th>Fecha</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+// ═══════════════ RENDER: ACTIVIDAD PRICING ═══════════════
+function renderActPricing(){
+  const n=D.props.length, total=n*50, m210=n*5;
+  $('actividadPricing').innerHTML=`<div class="dr"><span class="dr-l">Plan anual (${n} inm. × 50€)</span><span class="dr-v">${total} €/año</span></div><div class="dr"><span class="dr-l">Presentación M210 (${n} × 5€)</span><span class="dr-v">${m210} €</span></div><div class="dr" style="border-bottom:none;padding-top:8px;font-weight:500;font-size:13px"><span>Total primer año</span><span style="color:var(--green)">${total+m210} €</span></div>`;
+}
+
+// ═══════════════ RENDER: INGRESOS (DEV) ═══════════════
+function renderIngresos(){
+  const p=D.props[0]; // Primary rental property for fiscal engine
+  $('ingresosKpi').innerHTML=`
+    <div class="kpi"><div class="kpi-l">Ingresos brutos 2024</div><div class="kpi-v">24.800 €</div><div class="kpi-s up">+18% vs 2023</div></div>
+    <div class="kpi"><div class="kpi-l">Noches reservadas</div><div class="kpi-v">187</div><div class="kpi-s up">Ocupación 51%</div></div>
+    <div class="kpi"><div class="kpi-l">Precio medio/noche</div><div class="kpi-v">132 €</div><div class="kpi-s up">+8€ vs 2023</div></div>
+    <div class="kpi"><div class="kpi-l">Reservas activas</div><div class="kpi-v">3</div><div class="kpi-s warn">Próxima: 28 dic</div></div>`;
+
+  const tipoArrLabels={'particular_ext':'Particular','empresa_es':'Empresa ES','profesional_es':'Profesional ES','particular_es':'Particular ES'};
+  let rows=D.reservas.map((r,i)=>{
+    const isDirect=r.canal==='Directo';
+    const fi=isDirect?fiscalEngine(p, r):null;
+    const hasErr=fi&&fi.errors.length>0;
+    let actionBtn='';
+    if(isDirect){
+      actionBtn=hasErr
+        ?`<button class="b b-s" onclick="openRentalInvoice(${i})" style="color:var(--red-text)">⚠️ Revisar</button>`
+        :`<button class="b b-s" onclick="openRentalInvoice(${i})">📄 Factura</button>`;
+    } else {
+      actionBtn=`<span style="font-size:10px;color:var(--text3)">Liquidación ${r.canal}</span>`;
+    }
+    return `<tr${hasErr?' style="background:var(--red)"':''}>
+    <td><b>${r.h}</b><br><span style="font-size:10px;color:var(--text3)">${tipoArrLabels[r.tipoArr]||r.tipoArr} · ${r.noches} noches</span></td>
+    <td><span class="bd ${r.cat}">${r.canal}</span></td>
+    <td>${r.fechas}</td>
+    <td style="font-weight:500">${fmt(r.imp)} €</td>
+    <td><span class="bd ${r.stc}">${r.st}</span></td>
+    <td>${actionBtn}</td>
+  </tr>`}).join('');
+  const channels=[{n:'Booking.com',v:12400,p:50,c:'var(--blue-text)'},{n:'Airbnb',v:8680,p:35,c:'var(--purple-text)'},{n:'Directo',v:3720,p:15,c:'var(--text2)'}];
+  let chHtml=channels.map(c=>`<div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>${c.n}</span><span class="dr-v">${fmt(c.v)} € <span style="color:var(--text3);font-weight:400">(${c.p}%)</span></span></div><div class="bar"><div class="bar-f" style="width:${c.p}%;background:${c.c}"></div></div></div>`).join('');
+
+  $('ingresosContent').innerHTML=`<div class="c"><div class="c-h"><span class="c-t">Reservas recientes</span><button class="b b-s b-g" onclick="nuevaReserva()">+ Nueva</button></div><table><thead><tr><th>Huésped</th><th>Canal</th><th>Fechas</th><th>Importe</th><th>Estado</th><th>Documento</th></tr></thead><tbody>${rows}</tbody></table></div><div><div class="c"><div class="c-h"><span class="c-t">Ingresos por canal</span></div><div style="display:flex;flex-direction:column;gap:10px">${chHtml}</div></div></div>`;
+}
+
+// ═══════════════ RENDER: CALENDARIO (DEV) ═══════════════
+function renderCal(){
+  const days=[0,0,1,1,1,2,0, 0,0,0,0,0,0,0, 0,0,1,1,1,1,1, 1,1,2,0,0,0,0, 0,0,0,0,0];
+  let calH='<div class="cal-h">L</div><div class="cal-h">M</div><div class="cal-h">X</div><div class="cal-h">J</div><div class="cal-h">V</div><div class="cal-h">S</div><div class="cal-h">D</div>';
+  calH+='<div></div><div></div>';
+  days.forEach((d,i)=>{const cls=d===1?'occ':d===2?'par':'emp';calH+=`<div class="cal-d ${cls}">${i+1}</div>`});
+
+  $('calContent').innerHTML=`<div class="c"><div class="c-h"><span class="c-t">Enero 2025 · Apto. Estepona</span><div style="display:flex;gap:4px"><button class="b b-s" onclick="toast('Diciembre 2024 — próximamente navegación de meses','w')">← Dic</button><button class="b b-s" onclick="toast('Febrero 2025 — próximamente navegación de meses','w')">Feb →</button></div></div><div class="cal">${calH}</div><div style="display:flex;gap:14px;margin-top:12px;font-size:10px;color:var(--text3)"><div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:10px;border-radius:3px;background:var(--green-pale)"></div>Ocupado</div><div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:10px;border-radius:3px;background:var(--amber)"></div>Check-in/out</div><div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:10px;border-radius:3px;background:var(--surface2)"></div>Libre</div></div></div>
+  <div><div class="c"><div class="c-h"><span class="c-t">Ocupación enero</span></div><div class="dr"><span class="dr-l">Noches ocupadas</span><span class="dr-v">12 / 31</span></div><div class="dr"><span class="dr-l">Tasa ocupación</span><span class="dr-v" style="color:var(--amber-text)">39%</span></div><div class="dr"><span class="dr-l">Ingresos enero</span><span class="dr-v" style="color:var(--green-mid)">2.100 €</span></div><div class="dr" style="border-bottom:none"><span class="dr-l">Próximo check-in</span><span class="dr-v">15 ene</span></div></div>
+  <div class="c"><div class="c-h"><span class="c-t">Canales</span></div><div class="ck"><div class="ck-i ck-ok">✓</div><div><div style="font-weight:500">Booking.com</div><div style="color:var(--text3);font-size:10px">Sincronizado · Hace 2h</div></div></div><div class="ck"><div class="ck-i ck-ok">✓</div><div><div style="font-weight:500">Airbnb</div><div style="color:var(--text3);font-size:10px">Sincronizado · Hace 3h</div></div></div><div class="ck"><div class="ck-i ck-w">!</div><div><div style="font-weight:500">iCal directo</div><div style="color:var(--text3);font-size:10px">No configurado</div></div></div></div></div>`;
+}
+
+// ═══════════════ RENDER: GASTOS (DEV) ═══════════════
+function renderGastos(){
+  const total=D.gastos.reduce((a,g)=>a+g.v,0);
+  $('gastosKpi').innerHTML=`
+    <div class="kpi"><div class="kpi-l">Gastos deducibles 2024</div><div class="kpi-v">${fmt(total)} €</div><div class="kpi-s up">Apto. Estepona</div></div>
+    <div class="kpi"><div class="kpi-l">Gastos totales</div><div class="kpi-v">6.920 €</div><div class="kpi-s warn">2 inmuebles</div></div>
+    <div class="kpi"><div class="kpi-l">Facturas pendientes</div><div class="kpi-v">2</div><div class="kpi-s err">Subir en docs</div></div>`;
+
+  let bars=D.gastos.map(g=>`<div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span>${g.c}</span><span class="dr-v">${fmt(g.v)} €</span></div><div class="bar"><div class="bar-f" style="width:${Math.round(g.v/total*100)}%;background:var(--green-mid)"></div></div></div>`).join('');
+  $('gastosContent').innerHTML=`<div class="c"><div class="c-h"><span class="c-t">Gastos por categoría</span></div><div style="display:flex;flex-direction:column;gap:8px">${bars}</div><div class="hr"></div><div class="dr" style="font-weight:500;font-size:13px;border-bottom:none"><span>Total deducible</span><span style="color:var(--green-mid)">${fmt(total)} €</span></div></div>
+  <div class="c"><div class="c-h"><span class="c-t">Últimas facturas</span><button class="b b-s b-g" onclick="openUploadModal()">+ Subir</button></div><table><thead><tr><th>Concepto</th><th>Importe</th><th>Fecha</th><th>Estado</th></tr></thead><tbody><tr><td>Limpieza check-out</td><td>65 €</td><td>22 dic</td><td><span class="bd bd-g">Deducible</span></td></tr><tr><td>Reparación caldera</td><td>320 €</td><td>15 dic</td><td><span class="bd bd-g">Deducible</span></td></tr><tr><td>Electricidad Q4</td><td>145 €</td><td>1 dic</td><td><span class="bd bd-g">Deducible</span></td></tr><tr><td>Comunidad Q4</td><td>180 €</td><td>1 oct</td><td><span class="bd bd-g">Deducible</span></td></tr></tbody></table></div>`;
+}
+
+// ═══════════════ SIMULADOR FISCAL INTERACTIVO ═══════════════
+let simDias=187, simIngresos=24800, simGastos=4280;
+function renderSim(){
+  const p=D.props[0]; // primary rental property
+  const rate=D.user.rate;
+
+  // Calculate IRNR with current slider values
+  const diasImp=365-simDias;
+  const baseAlq=simIngresos-simGastos;
+  const baseAlqSinGastos=simIngresos;
+  const cuotaAlq=Math.round(Math.max(0,baseAlq)*rate/100);
+  const cuotaAlqSinGastos=Math.round(baseAlqSinGastos*rate/100);
+  const baseImp=Math.round(p.vc*p.tipImp/100*diasImp/365);
+  const cuotaImp=Math.round(baseImp*rate/100);
+  const totalCuota=cuotaAlq+cuotaImp;
+  const totalSinGastos=cuotaAlqSinGastos+cuotaImp;
+  const ahorro=totalSinGastos-totalCuota;
+
+  $('simContent').innerHTML=`
+  <div class="al al-i" style="margin-bottom:1.25rem">🧮 <div><b>Simulador en tiempo real</b>Mueve los controles y observa cómo cambia tu cuota IRNR. Los cálculos se basan en los datos de <b>${p.name}</b>.</div></div>
+
+  <div class="g2" style="align-items:start">
+    <div>
+      <div class="c">
+        <div class="c-h"><span class="c-t">Variables del ejercicio</span><span class="bd bd-b">${p.name}</span></div>
+
+        <div class="slider-wrap">
+          <div class="slider-head"><span class="slider-label">Días alquilados</span><span class="slider-val" id="simDiasVal">${simDias} noches</span></div>
+          <input type="range" min="0" max="365" value="${simDias}" oninput="simDias=+this.value;renderSim()"/>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-top:2px"><span>0 (uso propio)</span><span>365 (todo alquilado)</span></div>
+        </div>
+
+        <div class="slider-wrap">
+          <div class="slider-head"><span class="slider-label">Ingresos brutos alquiler</span><span class="slider-val" id="simIngVal">${fmt(simIngresos)} €</span></div>
+          <input type="range" min="0" max="80000" step="100" value="${simIngresos}" oninput="simIngresos=+this.value;renderSim()"/>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-top:2px"><span>0 €</span><span>80.000 €</span></div>
+        </div>
+
+        <div class="slider-wrap">
+          <div class="slider-head"><span class="slider-label">Gastos deducibles</span><span class="slider-val" id="simGasVal">${fmt(simGastos)} €</span></div>
+          <input type="range" min="0" max="30000" step="50" value="${simGastos}" oninput="simGastos=+this.value;renderSim()"/>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-top:2px"><span>0 €</span><span>30.000 €</span></div>
+        </div>
+
+        <div class="hr"></div>
+        <div style="font-size:11px;color:var(--text3);line-height:1.6">
+          <b style="color:var(--text2)">Datos fijos del inmueble:</b><br/>
+          Valor catastral: ${fmt(p.vc)} € · Tipo imputación: ${p.tipImp}% · Tipo IRNR: ${rate}% (${D.user.zone})
+        </div>
+      </div>
+
+      <!-- ESCENARIO COMPARATIVO -->
+      <div class="c" style="background:var(--green-pale);border-color:var(--green-soft)">
+        <div class="c-h"><span class="c-t" style="color:var(--green)">🔄 ¿Y si alquilas Villa Mijas también?</span></div>
+        <div style="font-size:12px;color:var(--green-text);line-height:1.6;margin-bottom:10px">
+          Si alquilaras la Villa Mijas 120 noches a 180 €/noche con 3.500 € de gastos:
+        </div>
+        <div class="dr"><span class="dr-l">Ingresos Villa Mijas</span><span class="dr-v" style="color:var(--green)">+21.600 €</span></div>
+        <div class="dr"><span class="dr-l">IRNR adicional estimado</span><span class="dr-v" style="color:var(--amber-text)">+3.439 €</span></div>
+        <div class="dr"><span class="dr-l">Ahorro vs dejar vacía</span><span class="dr-v" style="color:var(--green)">−439 € imputada</span></div>
+        <div class="dr" style="border-bottom:none"><span class="dr-l" style="font-weight:500;color:var(--green-text)">Beneficio neto estimado</span><span class="dr-v" style="color:var(--green);font-size:16px">+18.600 €</span></div>
+      </div>
+    </div>
+
+    <div>
+      <!-- RESULTADO PRINCIPAL -->
+      <div class="sim-hero" style="background:linear-gradient(135deg,${totalCuota>2000?'#fef2f2,#fef3c7':'#ecfdf5,#eff6ff'});border:1px solid ${totalCuota>2000?'rgba(185,28,28,.1)':'rgba(16,185,129,.1)'};margin-bottom:1.25rem">
+        <div style="font-size:11px;color:var(--text2);margin-bottom:8px">Tu cuota IRNR estimada</div>
+        <div class="sim-hero-val" style="color:${totalCuota>2000?'var(--red-text)':'var(--green)'}">${fmt(totalCuota)} €</div>
+        <div class="sim-hero-sub" style="color:var(--text2)">Ejercicio 2024 · ${p.name}</div>
+      </div>
+
+      <!-- DESGLOSE -->
+      <div class="c">
+        <div class="c-h"><span class="c-t">Desglose del cálculo</span></div>
+        <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">M210 Tipo 35 — Alquiler</div>
+        <div class="dr"><span class="dr-l">Ingresos brutos</span><span class="dr-v">${fmt(simIngresos)} €</span></div>
+        <div class="dr"><span class="dr-l">Gastos deducibles</span><span class="dr-v" style="color:var(--green-mid)">−${fmt(simGastos)} €</span></div>
+        <div class="dr"><span class="dr-l">Base imponible neta</span><span class="dr-v">${fmt(Math.max(0,baseAlq))} €</span></div>
+        <div class="dr" style="border-bottom:none"><span class="dr-l">Cuota (${rate}%)</span><span class="dr-v" style="color:var(--red-text)">${fmt(cuotaAlq)} €</span></div>
+
+        <div class="hr"></div>
+        <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">M210 Tipo 2 — Imputada</div>
+        <div class="dr"><span class="dr-l">Días no alquilados</span><span class="dr-v">${diasImp} días</span></div>
+        <div class="dr"><span class="dr-l">Base imputada</span><span class="dr-v">${fmt(baseImp)} €</span></div>
+        <div class="dr" style="border-bottom:none"><span class="dr-l">Cuota (${rate}%)</span><span class="dr-v" style="color:var(--amber-text)">${fmt(cuotaImp)} €</span></div>
+
+        <div class="hr"></div>
+        <div class="dr" style="border-bottom:none;font-size:14px;font-weight:600"><span>Total IRNR</span><span style="color:var(--red-text)">${fmt(totalCuota)} €</span></div>
+      </div>
+
+      <!-- COMPARATIVA GASTOS -->
+      <div class="c">
+        <div class="c-h"><span class="c-t">Impacto de los gastos deducibles</span></div>
+        <div class="comp-bar">
+          <div style="width:${Math.round(totalCuota/totalSinGastos*100)}%;background:var(--green);color:#ecfdf5">${fmt(totalCuota)} €</div>
+          <div style="width:${Math.round(ahorro/totalSinGastos*100)}%;background:var(--red);color:var(--red-text)">${fmt(ahorro)} €</div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:10px">
+          <span>Con gastos deducibles</span><span>Sin deducir gastos: ${fmt(totalSinGastos)} €</span>
+        </div>
+        <div style="text-align:center;padding:12px;background:var(--green-pale);border-radius:var(--r)">
+          <div style="font-size:11px;color:var(--green-text)">Ahorro por deducir gastos</div>
+          <div style="font-size:24px;font-weight:700;color:var(--green);letter-spacing:-.5px">${fmt(ahorro)} €</div>
+          <div style="font-size:10px;color:var(--green-text)">${Math.round(ahorro/totalSinGastos*100)}% menos de impuestos</div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ═══════════════ DASHBOARD RENTABILIDAD ═══════════════
+function renderRent(){
+  const props=D.props.map(p=>{
+    const ingresos=p.diasAlq?Math.round(p.diasAlq*132):0; // avg nightly rate
+    const gastosTot=p.ibi+p.comunidad+(p.seguro||0);
+    const irnr=p.decl.reduce((a,d)=>a+d.cuota,0);
+    const netoPre=ingresos-gastosTot;
+    const netoPost=ingresos-gastosTot-irnr;
+    const roi=p.valAdq>0?Math.round(netoPost/p.valAdq*1000)/10:0;
+    const roiBruto=p.valAdq>0?Math.round(ingresos/p.valAdq*1000)/10:0;
+    return {...p,ingresos,gastosTot,irnr,netoPre,netoPost,roi,roiBruto};
+  });
+
+  const totalIngresos=props.reduce((a,p)=>a+p.ingresos,0);
+  const totalGastos=props.reduce((a,p)=>a+p.gastosTot,0);
+  const totalIRNR=props.reduce((a,p)=>a+p.irnr,0);
+  const totalNeto=totalIngresos-totalGastos-totalIRNR;
+
+  $('rentContent').innerHTML=`
+  <div class="g4">
+    <div class="kpi"><div class="kpi-l">Ingresos brutos</div><div class="kpi-v">${fmt(totalIngresos)} €</div><div class="kpi-s up">${D.props.length} inmuebles</div></div>
+    <div class="kpi"><div class="kpi-l">Gastos totales</div><div class="kpi-v">${fmt(totalGastos)} €</div><div class="kpi-s warn">IBI + comunidad + seguro</div></div>
+    <div class="kpi"><div class="kpi-l">IRNR total</div><div class="kpi-v">${fmt(totalIRNR)} €</div><div class="kpi-s err">Impuestos 2024</div></div>
+    <div class="kpi"><div class="kpi-l">Beneficio neto</div><div class="kpi-v">${fmt(totalNeto)} €</div><div class="kpi-s ${totalNeto>0?'up':'err'}">${totalNeto>0?'Positivo':'Negativo'}</div></div>
+  </div>
+
+  <div class="g2" style="align-items:start">
+    <div>
+      <!-- PER-PROPERTY CARDS -->
+      ${props.map(p=>`<div class="c">
+        <div class="c-h"><span class="c-t">${p.icon} ${p.name}</span><span class="bd ${p.roi>3?'bd-g':p.roi>0?'bd-a':'bd-r'}">ROI ${p.roi}%</span></div>
+        <div style="display:flex;gap:1.25rem;margin-bottom:1rem">
+          <div style="flex:1;text-align:center;padding:12px;background:var(--surface2);border-radius:var(--r)">
+            <div style="font-size:10px;color:var(--text3)">Ingresos</div>
+            <div style="font-size:18px;font-weight:600;color:var(--green-mid)">${fmt(p.ingresos)} €</div>
+          </div>
+          <div style="flex:1;text-align:center;padding:12px;background:var(--surface2);border-radius:var(--r)">
+            <div style="font-size:10px;color:var(--text3)">Gastos + IRNR</div>
+            <div style="font-size:18px;font-weight:600;color:var(--red-text)">${fmt(p.gastosTot+p.irnr)} €</div>
+          </div>
+          <div style="flex:1;text-align:center;padding:12px;background:${p.netoPost>0?'var(--green-pale)':'var(--red)'};border-radius:var(--r)">
+            <div style="font-size:10px;color:var(--text3)">Neto</div>
+            <div style="font-size:18px;font-weight:600;color:${p.netoPost>0?'var(--green)':'var(--red-text)'}">${fmt(p.netoPost)} €</div>
+          </div>
+        </div>
+        <div class="dr"><span class="dr-l">Valor adquisición</span><span class="dr-v">${fmt(p.valAdq)} €</span></div>
+        <div class="dr"><span class="dr-l">ROI bruto</span><span class="dr-v">${p.roiBruto}%</span></div>
+        <div class="dr"><span class="dr-l">ROI neto (tras impuestos)</span><span class="dr-v" style="color:${p.roi>0?'var(--green-mid)':'var(--red-text)'}">${p.roi}%</span></div>
+        <div class="dr" style="border-bottom:none"><span class="dr-l">Ocupación</span><span class="dr-v">${p.diasAlq?Math.round(p.diasAlq/365*100)+'%':'No alquilado'}</span></div>
+        ${p.roi>0?`<div class="roi-meter" style="margin-top:8px"><div class="roi-meter-fill" style="width:${Math.min(p.roi*10,100)}%;background:${p.roi>5?'var(--green-mid)':p.roi>2?'var(--amber-text)':'var(--red-mid)'}"></div></div>`:''}
+      </div>`).join('')}
+    </div>
+
+    <div>
+      <!-- DISTRIBUCIÓN INGRESOS -->
+      <div class="c">
+        <div class="c-h"><span class="c-t">Distribución por inmueble</span></div>
+        ${props.filter(p=>p.ingresos>0).map(p=>{
+          const pct=Math.round(p.ingresos/totalIngresos*100);
+          return `<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>${p.icon} ${p.name}</span><span class="dr-v">${fmt(p.ingresos)} € (${pct}%)</span></div><div class="bar"><div class="bar-f" style="width:${pct}%;background:var(--green-mid)"></div></div></div>`;
+        }).join('')}
+        ${props.filter(p=>p.ingresos===0).map(p=>`<div style="display:flex;justify-content:space-between;font-size:12px;padding:8px 0;color:var(--text3)">${p.icon} ${p.name}<span>Sin ingresos</span></div>`).join('')}
+      </div>
+
+      <!-- WATERFALL: INCOME → NET -->
+      <div class="c">
+        <div class="c-h"><span class="c-t">De ingresos a beneficio neto</span></div>
+        <div style="display:flex;flex-direction:column;gap:6px;font-size:12px">
+          <div class="dr"><span class="dr-l">Ingresos brutos</span><span class="dr-v" style="color:var(--green-mid)">+${fmt(totalIngresos)} €</span></div>
+          <div class="dr"><span class="dr-l">IBI</span><span class="dr-v" style="color:var(--red-text)">−${fmt(props.reduce((a,p)=>a+p.ibi,0))} €</span></div>
+          <div class="dr"><span class="dr-l">Comunidad</span><span class="dr-v" style="color:var(--red-text)">−${fmt(props.reduce((a,p)=>a+p.comunidad,0))} €</span></div>
+          <div class="dr"><span class="dr-l">Seguros</span><span class="dr-v" style="color:var(--red-text)">−${fmt(props.reduce((a,p)=>a+(p.seguro||0),0))} €</span></div>
+          <div class="dr"><span class="dr-l">IRNR (impuestos)</span><span class="dr-v" style="color:var(--red-text)">−${fmt(totalIRNR)} €</span></div>
+          <div class="hr" style="margin:.5rem 0"></div>
+          <div class="dr" style="border-bottom:none;font-weight:600;font-size:14px"><span>Beneficio neto</span><span style="color:${totalNeto>0?'var(--green)':'var(--red-text)'}">${fmt(totalNeto)} €</span></div>
+        </div>
+      </div>
+
+      <!-- QUICK INSIGHT -->
+      <div class="c" style="background:var(--blue);border-color:rgba(30,64,175,.1)">
+        <div style="font-size:12px;font-weight:500;color:var(--blue-text);margin-bottom:6px">💡 Insight ResidIA</div>
+        <div style="font-size:12px;color:var(--blue-text);line-height:1.6">${
+          totalNeto>0
+            ?`Tu cartera inmobiliaria genera un rendimiento neto positivo de <b>${fmt(totalNeto)} €</b> anuales tras impuestos. ${props.some(p=>p.ingresos===0)?'Considera alquilar <b>'+props.find(p=>p.ingresos===0).name+'</b> para maximizar el retorno y reducir la renta imputada.':''}`
+            :`Tu cartera tiene rendimiento negativo. Revisa los gastos deducibles que puedas estar omitiendo — cada euro deducido reduce tu IRNR un ${D.user.rate}%.`
+        }</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ═══════════════ ACTIVIDAD / FEED ═══════════════
+const feedData=[
+  {t:'M210 borrador generado',d:'Tipo 35 · Apto. Estepona · Cuota 2.926 €',ico:'📋',bg:'var(--amber)',date:'20 dic 2024',cat:'fiscal'},
+  {t:'Reserva confirmada',d:'Klaus Weber · 28 dic – 4 ene · 1.120 €',ico:'✅',bg:'var(--green-pale)',date:'18 dic 2024',cat:'reserva'},
+  {t:'Factura de gasto registrada',d:'Reparación caldera · 320 € · Apto. Estepona',ico:'🧾',bg:'var(--surface2)',date:'15 dic 2024',cat:'gasto'},
+  {t:'Documento subido',d:'Recibo IBI 2024 · Apto. Estepona',ico:'📄',bg:'var(--blue)',date:'5 oct 2024',cat:'doc'},
+  {t:'Perfil fiscal actualizado',d:'País de residencia y tipo IRNR configurados',ico:'👤',bg:'var(--purple)',date:'20 sep 2024',cat:'perfil'},
+  {t:'Cuenta creada',d:'Bienvenido a ResidIA — 2 inmuebles registrados',ico:'🎉',bg:'var(--green-pale)',date:'15 sep 2024',cat:'sistema'},
+  {t:'Inmueble registrado',d:'Villa Mijas · Uso propio · VC 210.000 €',ico:'🏡',bg:'var(--surface2)',date:'15 sep 2024',cat:'inmueble'},
+  {t:'Inmueble registrado',d:'Apto. Estepona · Alquiler vacacional · VC 98.450 €',ico:'🏠',bg:'var(--surface2)',date:'15 sep 2024',cat:'inmueble'},
+];
+let feedFilter='all';
+function renderFeed(){
+  const cats={all:'Todo',fiscal:'Fiscal',reserva:'Reservas',gasto:'Gastos',doc:'Documentos',perfil:'Perfil',sistema:'Sistema',inmueble:'Inmuebles'};
+  const filtered=feedFilter==='all'?feedData:feedData.filter(f=>f.cat===feedFilter);
+
+  $('feedContent').innerHTML=`
+  <div class="feed-filter">${Object.entries(cats).map(([k,v])=>`<button class="feed-fbtn ${feedFilter===k?'on':''}" onclick="feedFilter='${k}';renderFeed()">${v}</button>`).join('')}</div>
+  <div class="c">
+    ${filtered.length?filtered.map(f=>`<div class="feed-item">
+      <div style="position:relative"><div class="feed-dot" style="background:${f.bg}"></div><div class="feed-line"></div></div>
+      <div style="width:32px;height:32px;border-radius:var(--r);background:${f.bg};display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">${f.ico}</div>
+      <div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:500">${f.t}</div><div style="font-size:11px;color:var(--text3)">${f.d}</div></div>
+      <div style="font-size:10px;color:var(--text3);white-space:nowrap;flex-shrink:0">${f.date}</div>
+    </div>`).join(''):`<div style="text-align:center;padding:2rem;color:var(--text3);font-size:13px">Sin actividad en esta categoría</div>`}
+  </div>`;
+}
+
+// ═══════════════ MULTI-IDIOMA (10 languages) ═══════════════
+let lang='es';
+const LANGS={es:'🇪🇸',en:'🇬🇧',sv:'🇸🇪',de:'🇩🇪',fr:'🇫🇷',nl:'🇳🇱',no:'🇳🇴',da:'🇩🇰',it:'🇮🇹',pt:'🇵🇹'};
+const LANG_NAMES={es:'Español',en:'English',sv:'Svenska',de:'Deutsch',fr:'Français',nl:'Nederlands',no:'Norsk',da:'Dansk',it:'Italiano',pt:'Português'};
+const i18n={
+  es:{
+    // Pages
+    resumen:'Resumen',perfil:'Perfil fiscal',inmuebles:'Mis inmuebles',documentos:'Documentos',plan:'Mi plan',
+    ingresos:'Ingresos y reservas',calendario:'Calendario',gastos:'Gastos y facturas',actividad:'Actividad económica',
+    // Nav
+    search:'Buscar inmueble, documento...',logout:'Cerrar sesión',
+    // KPI labels
+    kpi_inm:'Inmuebles',kpi_decl:'Declaraciones',kpi_irnr:'IRNR estimado',kpi_acciones:'Acciones pendientes',
+    kpi_registered:'Registrados',kpi_managed:'En gestión',kpi_exercise:'Ejercicio',kpi_attention:'Requiere atención',kpi_ok:'Todo OK',
+    // Card titles
+    my_properties:'Mis inmuebles',checklist_m210:'Pendiente para M210',complete_profile:'Completar perfil',
+    upload_docs:'Subir documentos',view_sheets:'Ver fichas',
+    // Buttons
+    btn_plan:'Plan',btn_authorize:'Autorizar presentación',btn_draft:'Ver borrador',btn_contact:'Contactar asesor',
+    btn_save:'Guardar',btn_cancel:'Cancelar',btn_close:'Cerrar',btn_upload:'Subir',btn_download:'Descargar',btn_edit:'Editar',
+    btn_add_property:'Añadir',btn_new:'Nueva',btn_hire:'Contratar plan anual',
+    // Misc
+    locked_title:'Actividad económica bloqueada',
+    locked_desc:'Activa el plan anual para gestionar reservas, Booking, Airbnb, gastos deducibles e informes de rentabilidad.',
+    see_plan:'Ver plan',actions:'acciones',guest:'Huésped',channel:'Canal',dates:'Fechas',amount:'Importe',
+    status:'Estado',document:'Documento',type:'Tipo',date:'Fecha',name:'Nombre',property:'Inmueble',
+    invoice:'Factura',settlement:'Liquidación',categories:'Categorías',all:'Todos',
+    // Fiscal
+    tax_situation:'Tu situación fiscal',tax_rep:'Representante fiscal',
+    // Notifications
+    notif_title:'Notificaciones',notif_read:'Marcar leídas',
+    // Session
+    session_cert:'Certificado digital',session_clave:'Cl@ve',session_pass:'NIE + Contraseña',
+    // Login
+    login_title:'Accede a tu panel fiscal',login_subtitle:'Plataforma fiscal para no residentes con inmuebles en España',
+    login_cert:'Certificado digital',login_cert_desc:'FNMT, DNIe o certificado cualificado',
+    login_clave:'Cl@ve PIN / Cl@ve permanente',login_clave_desc:'Sistema de identificación de la Administración',
+    login_nie:'NIE + Contraseña',login_nie_desc:'Acceso básico',login_or:'o accede con tus credenciales',
+    login_register:'¿No tienes cuenta?',login_register_link:'Regístrate en 2 minutos',login_access:'Acceder',
+    login_recommended:'Recomendado',login_reading_cert:'Leyendo certificado digital...',login_redirect_clave:'Redirigiendo a Cl@ve...',
+    // Toasts
+    toast_lang:'Idioma: Español',toast_login:'Sesión iniciada',toast_login_cert:' con certificado digital',toast_login_clave:' vía Cl@ve'
+  },
+  en:{
+    resumen:'Overview',perfil:'Tax profile',inmuebles:'My properties',documentos:'Documents',plan:'My plan',
+    ingresos:'Income & bookings',calendario:'Calendar',gastos:'Expenses & invoices',actividad:'Economic activity',
+    search:'Search property, document...',logout:'Log out',
+    kpi_inm:'Properties',kpi_decl:'Declarations',kpi_irnr:'Est. IRNR',kpi_acciones:'Pending actions',
+    kpi_registered:'Registered',kpi_managed:'In progress',kpi_exercise:'FY',kpi_attention:'Needs attention',kpi_ok:'All OK',
+    my_properties:'My properties',checklist_m210:'Pending for M210',complete_profile:'Complete profile',
+    upload_docs:'Upload documents',view_sheets:'View details',
+    btn_plan:'Plan',btn_authorize:'Authorize filing',btn_draft:'View draft',btn_contact:'Contact advisor',
+    btn_save:'Save',btn_cancel:'Cancel',btn_close:'Close',btn_upload:'Upload',btn_download:'Download',btn_edit:'Edit',
+    btn_add_property:'Add',btn_new:'New',btn_hire:'Subscribe annual plan',
+    locked_title:'Economic activity locked',
+    locked_desc:'Activate the annual plan to manage bookings, Booking, Airbnb, deductible expenses and profitability reports.',
+    see_plan:'See plan',actions:'actions',guest:'Guest',channel:'Channel',dates:'Dates',amount:'Amount',
+    status:'Status',document:'Document',type:'Type',date:'Date',name:'Name',property:'Property',
+    invoice:'Invoice',settlement:'Settlement',categories:'Categories',all:'All',
+    tax_situation:'Your tax situation',tax_rep:'Tax representative',
+    notif_title:'Notifications',notif_read:'Mark as read',
+    session_cert:'Digital certificate',session_clave:'Cl@ve',session_pass:'NIE + Password',
+    login_title:'Access your tax dashboard',login_subtitle:'Tax platform for non-residents with properties in Spain',
+    login_cert:'Digital certificate',login_cert_desc:'FNMT, DNIe or qualified certificate',
+    login_clave:'Cl@ve PIN / Cl@ve permanent',login_clave_desc:'Spanish Administration ID system',
+    login_nie:'NIE + Password',login_nie_desc:'Basic access',login_or:'or log in with your credentials',
+    login_register:"Don't have an account?",login_register_link:'Register in 2 minutes',login_access:'Log in',
+    login_recommended:'Recommended',login_reading_cert:'Reading digital certificate...',login_redirect_clave:'Redirecting to Cl@ve...',
+    toast_lang:'Language: English',toast_login:'Logged in',toast_login_cert:' with digital certificate',toast_login_clave:' via Cl@ve'
+  },
+  sv:{
+    resumen:'Översikt',perfil:'Skatteprofil',inmuebles:'Mina fastigheter',documentos:'Dokument',plan:'Min plan',
+    ingresos:'Inkomster & bokningar',calendario:'Kalender',gastos:'Utgifter & fakturor',actividad:'Ekonomisk verksamhet',
+    search:'Sök fastighet, dokument...',logout:'Logga ut',
+    kpi_inm:'Fastigheter',kpi_decl:'Deklarationer',kpi_irnr:'Beräknad IRNR',kpi_acciones:'Väntande åtgärder',
+    kpi_registered:'Registrerade',kpi_managed:'Under hantering',kpi_exercise:'Beskattningsår',kpi_attention:'Kräver åtgärd',kpi_ok:'Allt OK',
+    my_properties:'Mina fastigheter',checklist_m210:'Återstår för M210',complete_profile:'Komplettera profil',
+    upload_docs:'Ladda upp dokument',view_sheets:'Visa detaljer',
+    btn_plan:'Plan',btn_authorize:'Godkänn inlämning',btn_draft:'Visa utkast',btn_contact:'Kontakta rådgivare',
+    btn_save:'Spara',btn_cancel:'Avbryt',btn_close:'Stäng',btn_upload:'Ladda upp',btn_download:'Ladda ner',btn_edit:'Redigera',
+    btn_add_property:'Lägg till',btn_new:'Ny',btn_hire:'Teckna årsplan',
+    locked_title:'Ekonomisk verksamhet låst',
+    locked_desc:'Aktivera årsplanen för att hantera bokningar, Booking, Airbnb, avdragsgilla kostnader och lönsamhetsrapporter.',
+    see_plan:'Se plan',actions:'åtgärder',guest:'Gäst',channel:'Kanal',dates:'Datum',amount:'Belopp',
+    status:'Status',document:'Dokument',type:'Typ',date:'Datum',name:'Namn',property:'Fastighet',
+    invoice:'Faktura',settlement:'Avräkning',categories:'Kategorier',all:'Alla',
+    tax_situation:'Din skattesituation',tax_rep:'Skatterepresentant',
+    notif_title:'Aviseringar',notif_read:'Markera lästa',
+    session_cert:'Digitalt certifikat',session_clave:'Cl@ve',session_pass:'NIE + Lösenord',
+    login_title:'Logga in på din skattepanel',login_subtitle:'Skatteplattform för icke-bosatta med fastigheter i Spanien',
+    login_cert:'Digitalt certifikat',login_cert_desc:'FNMT, DNIe eller kvalificerat certifikat',
+    login_clave:'Cl@ve PIN / Cl@ve permanent',login_clave_desc:'Spanska förvaltningens ID-system',
+    login_nie:'NIE + Lösenord',login_nie_desc:'Grundläggande åtkomst',login_or:'eller logga in med dina uppgifter',
+    login_register:'Har du inget konto?',login_register_link:'Registrera dig på 2 minuter',login_access:'Logga in',
+    login_recommended:'Rekommenderat',login_reading_cert:'Läser digitalt certifikat...',login_redirect_clave:'Omdirigerar till Cl@ve...',
+    toast_lang:'Språk: Svenska',toast_login:'Inloggad',toast_login_cert:' med digitalt certifikat',toast_login_clave:' via Cl@ve'
+  },
+  de:{
+    resumen:'Übersicht',perfil:'Steuerprofil',inmuebles:'Meine Immobilien',documentos:'Dokumente',plan:'Mein Plan',
+    ingresos:'Einnahmen & Buchungen',calendario:'Kalender',gastos:'Ausgaben & Rechnungen',actividad:'Wirtschaftliche Tätigkeit',
+    search:'Immobilie, Dokument suchen...',logout:'Abmelden',
+    kpi_inm:'Immobilien',kpi_decl:'Erklärungen',kpi_irnr:'Geschätzte IRNR',kpi_acciones:'Offene Aktionen',
+    kpi_registered:'Registriert',kpi_managed:'In Bearbeitung',kpi_exercise:'Steuerjahr',kpi_attention:'Handlung erforderlich',kpi_ok:'Alles OK',
+    my_properties:'Meine Immobilien',checklist_m210:'Ausstehend für M210',complete_profile:'Profil vervollständigen',
+    upload_docs:'Dokumente hochladen',view_sheets:'Details anzeigen',
+    btn_plan:'Plan',btn_authorize:'Einreichung genehmigen',btn_draft:'Entwurf anzeigen',btn_contact:'Berater kontaktieren',
+    btn_save:'Speichern',btn_cancel:'Abbrechen',btn_close:'Schließen',btn_upload:'Hochladen',btn_download:'Herunterladen',btn_edit:'Bearbeiten',
+    btn_add_property:'Hinzufügen',btn_new:'Neu',btn_hire:'Jahresplan abschließen',
+    locked_title:'Wirtschaftliche Tätigkeit gesperrt',
+    locked_desc:'Aktivieren Sie den Jahresplan für Buchungsverwaltung, Booking, Airbnb, abzugsfähige Kosten und Rentabilitätsberichte.',
+    see_plan:'Plan anzeigen',actions:'Aktionen',guest:'Gast',channel:'Kanal',dates:'Zeitraum',amount:'Betrag',
+    status:'Status',document:'Dokument',type:'Typ',date:'Datum',name:'Name',property:'Immobilie',
+    invoice:'Rechnung',settlement:'Abrechnung',categories:'Kategorien',all:'Alle',
+    tax_situation:'Ihre Steuersituation',tax_rep:'Steuervertreter',
+    notif_title:'Benachrichtigungen',notif_read:'Alle gelesen',
+    session_cert:'Digitales Zertifikat',session_clave:'Cl@ve',session_pass:'NIE + Passwort',
+    login_title:'Zugang zu Ihrem Steuer-Dashboard',login_subtitle:'Steuerplattform für Nichtansässige mit Immobilien in Spanien',
+    login_cert:'Digitales Zertifikat',login_cert_desc:'FNMT, DNIe oder qualifiziertes Zertifikat',
+    login_clave:'Cl@ve PIN / Cl@ve permanent',login_clave_desc:'Spanisches Identifikationssystem',
+    login_nie:'NIE + Passwort',login_nie_desc:'Basis-Zugang',login_or:'oder melden Sie sich mit Ihren Daten an',
+    login_register:'Noch kein Konto?',login_register_link:'In 2 Minuten registrieren',login_access:'Anmelden',
+    login_recommended:'Empfohlen',login_reading_cert:'Digitales Zertifikat wird gelesen...',login_redirect_clave:'Weiterleitung zu Cl@ve...',
+    toast_lang:'Sprache: Deutsch',toast_login:'Angemeldet',toast_login_cert:' mit digitalem Zertifikat',toast_login_clave:' über Cl@ve'
+  },
+  fr:{
+    resumen:'Aperçu',perfil:'Profil fiscal',inmuebles:'Mes biens',documentos:'Documents',plan:'Mon plan',
+    ingresos:'Revenus & réservations',calendario:'Calendrier',gastos:'Dépenses & factures',actividad:'Activité économique',
+    search:'Rechercher bien, document...',logout:'Déconnexion',
+    kpi_inm:'Biens',kpi_decl:'Déclarations',kpi_irnr:'IRNR estimé',kpi_acciones:'Actions en attente',
+    kpi_registered:'Enregistrés',kpi_managed:'En cours',kpi_exercise:'Exercice',kpi_attention:'Action requise',kpi_ok:'Tout OK',
+    my_properties:'Mes biens',checklist_m210:'En attente pour M210',complete_profile:'Compléter profil',
+    upload_docs:'Télécharger documents',view_sheets:'Voir détails',
+    btn_plan:'Plan',btn_authorize:'Autoriser le dépôt',btn_draft:'Voir brouillon',btn_contact:'Contacter conseiller',
+    btn_save:'Enregistrer',btn_cancel:'Annuler',btn_close:'Fermer',btn_upload:'Télécharger',btn_download:'Télécharger',btn_edit:'Modifier',
+    btn_add_property:'Ajouter',btn_new:'Nouveau',btn_hire:'Souscrire plan annuel',
+    locked_title:'Activité économique verrouillée',
+    locked_desc:'Activez le plan annuel pour gérer les réservations, Booking, Airbnb, les dépenses déductibles et les rapports de rentabilité.',
+    see_plan:'Voir plan',actions:'actions',guest:'Hôte',channel:'Canal',dates:'Dates',amount:'Montant',
+    status:'Statut',document:'Document',type:'Type',date:'Date',name:'Nom',property:'Bien',
+    invoice:'Facture',settlement:'Relevé',categories:'Catégories',all:'Tous',
+    tax_situation:'Votre situation fiscale',tax_rep:'Représentant fiscal',
+    notif_title:'Notifications',notif_read:'Marquer comme lues',
+    session_cert:'Certificat numérique',session_clave:'Cl@ve',session_pass:'NIE + Mot de passe',
+    login_title:'Accédez à votre tableau de bord fiscal',login_subtitle:'Plateforme fiscale pour non-résidents avec des biens en Espagne',
+    login_cert:'Certificat numérique',login_cert_desc:'FNMT, DNIe ou certificat qualifié',
+    login_clave:'Cl@ve PIN / Cl@ve permanent',login_clave_desc:"Système d'identification de l'Administration espagnole",
+    login_nie:'NIE + Mot de passe',login_nie_desc:'Accès basique',login_or:'ou connectez-vous avec vos identifiants',
+    login_register:"Pas encore de compte ?",login_register_link:"S'inscrire en 2 minutes",login_access:'Se connecter',
+    login_recommended:'Recommandé',login_reading_cert:'Lecture du certificat...',login_redirect_clave:'Redirection vers Cl@ve...',
+    toast_lang:'Langue : Français',toast_login:'Connecté',toast_login_cert:' avec certificat numérique',toast_login_clave:' via Cl@ve'
+  },
+  nl:{resumen:'Overzicht',perfil:'Belastingprofiel',inmuebles:'Mijn woningen',documentos:'Documenten',plan:'Mijn plan',ingresos:'Inkomsten & boekingen',calendario:'Kalender',gastos:'Kosten & facturen',actividad:'Economische activiteit',search:'Zoek woning, document...',logout:'Uitloggen',kpi_inm:'Woningen',kpi_decl:'Aangiften',kpi_irnr:'Geschatte IRNR',kpi_acciones:'Openstaande acties',kpi_registered:'Geregistreerd',kpi_managed:'In behandeling',kpi_exercise:'Belastingjaar',kpi_attention:'Actie vereist',kpi_ok:'Alles OK',my_properties:'Mijn woningen',checklist_m210:'Openstaand voor M210',complete_profile:'Profiel voltooien',upload_docs:'Documenten uploaden',view_sheets:'Details bekijken',btn_plan:'Plan',btn_authorize:'Indiening goedkeuren',btn_draft:'Concept bekijken',btn_contact:'Adviseur contacteren',btn_save:'Opslaan',btn_cancel:'Annuleren',btn_close:'Sluiten',btn_upload:'Uploaden',btn_download:'Downloaden',btn_edit:'Bewerken',btn_add_property:'Toevoegen',btn_new:'Nieuw',btn_hire:'Jaarplan afsluiten',locked_title:'Economische activiteit vergrendeld',locked_desc:'Activeer het jaarplan voor boekingsbeheer, Booking, Airbnb, aftrekbare kosten en rendabiliteitsrapporten.',see_plan:'Bekijk plan',actions:'acties',guest:'Gast',channel:'Kanaal',dates:'Data',amount:'Bedrag',status:'Status',document:'Document',type:'Type',date:'Datum',name:'Naam',property:'Woning',invoice:'Factuur',settlement:'Afrekening',categories:'Categorieën',all:'Alle',tax_situation:'Uw belastingsituatie',tax_rep:'Fiscaal vertegenwoordiger',notif_title:'Meldingen',notif_read:'Alles gelezen',toast_lang:'Taal: Nederlands',toast_login:'Ingelogd',toast_login_cert:' met digitaal certificaat',toast_login_clave:' via Cl@ve',login_title:'Toegang tot uw belastingdashboard',login_subtitle:'Belastingplatform voor niet-ingezetenen met onroerend goed in Spanje',login_cert:'Digitaal certificaat',login_cert_desc:'FNMT, DNIe of gekwalificeerd certificaat',login_clave:'Cl@ve PIN / Cl@ve permanent',login_clave_desc:'Spaans identificatiesysteem',login_nie:'NIE + Wachtwoord',login_nie_desc:'Basistoegang',login_or:'of log in met uw gegevens',login_register:'Nog geen account?',login_register_link:'Registreer in 2 minuten',login_access:'Inloggen',login_recommended:'Aanbevolen',login_reading_cert:'Digitaal certificaat lezen...',login_redirect_clave:'Doorverwijzen naar Cl@ve...'},
+  no:{resumen:'Oversikt',perfil:'Skatteprofil',inmuebles:'Mine eiendommer',documentos:'Dokumenter',plan:'Min plan',ingresos:'Inntekter & bestillinger',calendario:'Kalender',gastos:'Utgifter & fakturaer',actividad:'Økonomisk aktivitet',search:'Søk eiendom, dokument...',logout:'Logg ut',kpi_inm:'Eiendommer',kpi_decl:'Deklarasjoner',kpi_irnr:'Estimert IRNR',kpi_acciones:'Ventende handlinger',kpi_registered:'Registrert',kpi_managed:'Under behandling',kpi_exercise:'Skatteår',kpi_attention:'Krever handling',kpi_ok:'Alt OK',my_properties:'Mine eiendommer',checklist_m210:'Gjenstår for M210',complete_profile:'Fullfør profil',upload_docs:'Last opp dokumenter',view_sheets:'Se detaljer',btn_plan:'Plan',btn_authorize:'Godkjenn innlevering',btn_draft:'Se utkast',btn_contact:'Kontakt rådgiver',btn_save:'Lagre',btn_cancel:'Avbryt',btn_close:'Lukk',btn_upload:'Last opp',btn_download:'Last ned',btn_edit:'Rediger',btn_add_property:'Legg til',btn_new:'Ny',btn_hire:'Tegn årsplan',locked_title:'Økonomisk aktivitet låst',locked_desc:'Aktiver årsplanen for å administrere bestillinger, Booking, Airbnb, fradragsberettigede kostnader og lønnsomhetsrapporter.',see_plan:'Se plan',actions:'handlinger',guest:'Gjest',channel:'Kanal',dates:'Datoer',amount:'Beløp',status:'Status',document:'Dokument',type:'Type',date:'Dato',name:'Navn',property:'Eiendom',invoice:'Faktura',settlement:'Oppgjør',categories:'Kategorier',all:'Alle',tax_situation:'Din skattesituasjon',tax_rep:'Skatterepresentant',notif_title:'Varsler',notif_read:'Merk alle lest',toast_lang:'Språk: Norsk',toast_login:'Logget inn',toast_login_cert:' med digitalt sertifikat',toast_login_clave:' via Cl@ve',login_title:'Logg inn på skattepanelet',login_subtitle:'Skatteplattform for ikke-bosatte med eiendommer i Spania',login_cert:'Digitalt sertifikat',login_cert_desc:'FNMT, DNIe eller kvalifisert sertifikat',login_clave:'Cl@ve PIN / Cl@ve permanent',login_clave_desc:'Spansk administrasjons ID-system',login_nie:'NIE + Passord',login_nie_desc:'Grunnleggende tilgang',login_or:'eller logg inn med dine data',login_register:'Har du ikke konto?',login_register_link:'Registrer deg på 2 minutter',login_access:'Logg inn',login_recommended:'Anbefalt',login_reading_cert:'Leser digitalt sertifikat...',login_redirect_clave:'Omdirigerer til Cl@ve...'},
+  da:{resumen:'Overblik',perfil:'Skatteprofil',inmuebles:'Mine ejendomme',documentos:'Dokumenter',plan:'Min plan',ingresos:'Indtægter & reservationer',calendario:'Kalender',gastos:'Udgifter & fakturaer',actividad:'Økonomisk aktivitet',search:'Søg ejendom, dokument...',logout:'Log ud',kpi_inm:'Ejendomme',kpi_decl:'Erklæringer',kpi_irnr:'Estimeret IRNR',kpi_acciones:'Afventende handlinger',kpi_registered:'Registreret',kpi_managed:'Under behandling',kpi_exercise:'Skatteår',kpi_attention:'Kræver handling',kpi_ok:'Alt OK',my_properties:'Mine ejendomme',checklist_m210:'Afventer for M210',complete_profile:'Fuldfør profil',upload_docs:'Upload dokumenter',view_sheets:'Se detaljer',btn_plan:'Plan',btn_authorize:'Godkend indgivelse',btn_draft:'Se udkast',btn_contact:'Kontakt rådgiver',btn_save:'Gem',btn_cancel:'Annuller',btn_close:'Luk',btn_upload:'Upload',btn_download:'Download',btn_edit:'Rediger',btn_add_property:'Tilføj',btn_new:'Ny',btn_hire:'Tegn årsplan',locked_title:'Økonomisk aktivitet låst',locked_desc:'Aktiver årsplanen for at administrere reservationer, Booking, Airbnb, fradragsberettigede udgifter og rentabilitetsrapporter.',see_plan:'Se plan',actions:'handlinger',guest:'Gæst',channel:'Kanal',dates:'Datoer',amount:'Beløb',status:'Status',document:'Dokument',type:'Type',date:'Dato',name:'Navn',property:'Ejendom',invoice:'Faktura',settlement:'Opgørelse',categories:'Kategorier',all:'Alle',tax_situation:'Din skattesituation',tax_rep:'Skatterepræsentant',notif_title:'Notifikationer',notif_read:'Marker alle læst',toast_lang:'Sprog: Dansk',toast_login:'Logget ind',toast_login_cert:' med digitalt certifikat',toast_login_clave:' via Cl@ve',login_title:'Adgang til dit skattepanel',login_subtitle:'Skatteplatform for ikke-bosatte med ejendomme i Spanien',login_cert:'Digitalt certifikat',login_cert_desc:'FNMT, DNIe eller kvalificeret certifikat',login_clave:'Cl@ve PIN / Cl@ve permanent',login_clave_desc:'Spansk administrations ID-system',login_nie:'NIE + Adgangskode',login_nie_desc:'Grundlæggende adgang',login_or:'eller log ind med dine data',login_register:'Har du ikke en konto?',login_register_link:'Registrer dig på 2 minutter',login_access:'Log ind',login_recommended:'Anbefalet',login_reading_cert:'Læser digitalt certifikat...',login_redirect_clave:'Omdirigerer til Cl@ve...'},
+  it:{resumen:'Panoramica',perfil:'Profilo fiscale',inmuebles:'I miei immobili',documentos:'Documenti',plan:'Il mio piano',ingresos:'Entrate e prenotazioni',calendario:'Calendario',gastos:'Spese e fatture',actividad:'Attività economica',search:'Cerca immobile, documento...',logout:'Esci',kpi_inm:'Immobili',kpi_decl:'Dichiarazioni',kpi_irnr:'IRNR stimata',kpi_acciones:'Azioni in sospeso',kpi_registered:'Registrati',kpi_managed:'In gestione',kpi_exercise:'Anno fiscale',kpi_attention:'Richiede attenzione',kpi_ok:'Tutto OK',my_properties:'I miei immobili',checklist_m210:'In sospeso per M210',complete_profile:'Completa profilo',upload_docs:'Carica documenti',view_sheets:'Vedi dettagli',btn_plan:'Piano',btn_authorize:'Autorizza presentazione',btn_draft:'Vedi bozza',btn_contact:'Contatta consulente',btn_save:'Salva',btn_cancel:'Annulla',btn_close:'Chiudi',btn_upload:'Carica',btn_download:'Scarica',btn_edit:'Modifica',btn_add_property:'Aggiungi',btn_new:'Nuovo',btn_hire:'Sottoscrivi piano annuale',locked_title:'Attività economica bloccata',locked_desc:"Attiva il piano annuale per gestire prenotazioni, Booking, Airbnb, spese deducibili e report di redditività.",see_plan:'Vedi piano',actions:'azioni',guest:'Ospite',channel:'Canale',dates:'Date',amount:'Importo',status:'Stato',document:'Documento',type:'Tipo',date:'Data',name:'Nome',property:'Immobile',invoice:'Fattura',settlement:'Liquidazione',categories:'Categorie',all:'Tutti',tax_situation:'La tua situazione fiscale',tax_rep:'Rappresentante fiscale',notif_title:'Notifiche',notif_read:'Segna come lette',toast_lang:'Lingua: Italiano',toast_login:'Accesso effettuato',toast_login_cert:' con certificato digitale',toast_login_clave:' via Cl@ve',login_title:'Accedi al tuo pannello fiscale',login_subtitle:'Piattaforma fiscale per non residenti con immobili in Spagna',login_cert:'Certificato digitale',login_cert_desc:'FNMT, DNIe o certificato qualificato',login_clave:'Cl@ve PIN / Cl@ve permanente',login_clave_desc:"Sistema di identificazione dell'Amministrazione spagnola",login_nie:'NIE + Password',login_nie_desc:'Accesso base',login_or:'oppure accedi con le tue credenziali',login_register:'Non hai un account?',login_register_link:'Registrati in 2 minuti',login_access:'Accedi',login_recommended:'Consigliato',login_reading_cert:'Lettura certificato digitale...',login_redirect_clave:'Reindirizzamento a Cl@ve...'},
+  pt:{resumen:'Resumo',perfil:'Perfil fiscal',inmuebles:'Os meus imóveis',documentos:'Documentos',plan:'O meu plano',ingresos:'Rendimentos e reservas',calendario:'Calendário',gastos:'Despesas e faturas',actividad:'Atividade económica',search:'Pesquisar imóvel, documento...',logout:'Terminar sessão',kpi_inm:'Imóveis',kpi_decl:'Declarações',kpi_irnr:'IRNR estimado',kpi_acciones:'Ações pendentes',kpi_registered:'Registados',kpi_managed:'Em gestão',kpi_exercise:'Exercício',kpi_attention:'Requer atenção',kpi_ok:'Tudo OK',my_properties:'Os meus imóveis',checklist_m210:'Pendente para M210',complete_profile:'Completar perfil',upload_docs:'Carregar documentos',view_sheets:'Ver detalhes',btn_plan:'Plano',btn_authorize:'Autorizar submissão',btn_draft:'Ver rascunho',btn_contact:'Contactar consultor',btn_save:'Guardar',btn_cancel:'Cancelar',btn_close:'Fechar',btn_upload:'Carregar',btn_download:'Descarregar',btn_edit:'Editar',btn_add_property:'Adicionar',btn_new:'Novo',btn_hire:'Subscrever plano anual',locked_title:'Atividade económica bloqueada',locked_desc:'Ative o plano anual para gerir reservas, Booking, Airbnb, despesas dedutíveis e relatórios de rentabilidade.',see_plan:'Ver plano',actions:'ações',guest:'Hóspede',channel:'Canal',dates:'Datas',amount:'Montante',status:'Estado',document:'Documento',type:'Tipo',date:'Data',name:'Nome',property:'Imóvel',invoice:'Fatura',settlement:'Liquidação',categories:'Categorias',all:'Todos',tax_situation:'A sua situação fiscal',tax_rep:'Representante fiscal',notif_title:'Notificações',notif_read:'Marcar como lidas',toast_lang:'Idioma: Português',toast_login:'Sessão iniciada',toast_login_cert:' com certificado digital',toast_login_clave:' via Cl@ve',login_title:'Aceda ao seu painel fiscal',login_subtitle:'Plataforma fiscal para não residentes com imóveis em Espanha',login_cert:'Certificado digital',login_cert_desc:'FNMT, DNIe ou certificado qualificado',login_clave:'Cl@ve PIN / Cl@ve permanente',login_clave_desc:'Sistema de identificação da Administração espanhola',login_nie:'NIE + Palavra-passe',login_nie_desc:'Acesso básico',login_or:'ou aceda com as suas credenciais',login_register:'Não tem conta?',login_register_link:'Registe-se em 2 minutos',login_access:'Aceder',login_recommended:'Recomendado',login_reading_cert:'A ler certificado digital...',login_redirect_clave:'A redirecionar para Cl@ve...'}
+};
+
+// Helper to get translated string
+function t(key){return (i18n[lang]&&i18n[lang][key])||i18n.es[key]||key}
+
+function toggleLangMenu(){$('langDd').classList.toggle('on')}
+document.addEventListener('click',e=>{if(!e.target.closest('.lang-sw'))$('langDd').classList.remove('on')});
+
+function setLang(l){
+  lang=l;
+  $('langDd').classList.remove('on');
+  // Update button
+  $('langBtn').innerHTML=`${LANGS[l]} ${l.toUpperCase()} ▾`;
+  // Update dropdown active state
+  $$('.lang-item').forEach(item=>{
+    const itemLang=item.getAttribute('onclick').match(/'(\w+)'/)[1];
+    item.classList.toggle('on',itemLang===l);
+  });
+  // Update sidebar nav labels
+  $$('.sb-btn[data-pg]').forEach(btn=>{
+    const pg=btn.dataset.pg;
+    const txt=t(pg);
+    if(txt && txt!==pg){
+      const emoji=btn.textContent.trim().match(/^[\p{Emoji}\u200d]+/u);
+      const emojiStr=emoji?emoji[0]:'';
+      const pill=btn.querySelector('.pill, .lock-ico');
+      const pillHtml=pill?` ${pill.outerHTML}`:'';
+      btn.innerHTML=`${emojiStr} ${txt}${pillHtml}`;
+    }
+  });
+  // Update search placeholder
+  const si=$('searchInput');
+  if(si)si.placeholder=t('search');
+  // Update top title
+  const curPage=document.querySelector('.pg.on');
+  if(curPage){
+    const pgId=curPage.id.replace('pg-','');
+    $('topTitle').textContent=t(pgId);
+  }
+  // Update lock banner
+  const lb=$('lockBanner');
+  if(lb){
+    lb.querySelector('div:nth-child(2) > div:first-child').textContent=t('locked_title');
+    lb.querySelector('div:nth-child(2) > div:last-child').textContent=t('locked_desc');
+    lb.querySelector('.b').innerHTML=t('see_plan')+' →';
+  }
+  // Re-render data-driven sections to pick up translated labels
+  renderResumen();renderNotifs();
+  toast(t('toast_lang'),'ok');
+}
+
+// ═══════════════ SIMULADOR FISCAL INTERACTIVO ═══════════════
+let sim={
+  propIdx:0,
+  diasAlq:187, ingresos:24800, gastos:4280,
+  scenarioOn:false, scDiasAlq:120, scIngresos:15600, scGastos:2800
+};
+
+function renderSimulador(){
+  const p=D.props[sim.propIdx];
+  const rate=D.user.rate;
+
+  // ── T35 Calculation (rental income) ──
+  const baseT35=Math.max(0, sim.ingresos - (D.user.zone==='UE'?sim.gastos:0));
+  const cuotaT35=Math.round(baseT35 * rate/100);
+
+  // ── T2 Calculation (imputed income for non-rented days) ──
+  const diasImp=365-sim.diasAlq;
+  const baseT2=Math.round(p.vc * p.tipImp/100 * diasImp/365);
+  const cuotaT2=Math.round(baseT2 * rate/100);
+
+  const totalIRNR=cuotaT35+cuotaT2;
+
+  // ── Comparison: without deductible expenses ──
+  const cuotaSinGastos=Math.round(sim.ingresos * rate/100);
+  const ahorro=cuotaSinGastos-cuotaT35;
+
+  // ── Scenario (if enabled) ──
+  let scHtml='';
+  if(sim.scenarioOn){
+    const scP=D.props[1]||D.props[0];
+    const scBaseT35=Math.max(0, sim.scIngresos - (D.user.zone==='UE'?sim.scGastos:0));
+    const scCuotaT35=Math.round(scBaseT35 * rate/100);
+    const scDiasImp=365-sim.scDiasAlq;
+    const scBaseT2=Math.round(scP.vc * scP.tipImp/100 * scDiasImp/365);
+    const scCuotaT2=Math.round(scBaseT2 * rate/100);
+    const scTotal=scCuotaT35+scCuotaT2;
+    const newGrandTotal=totalIRNR+scTotal;
+    const newIngresos=sim.ingresos+sim.scIngresos;
+
+    scHtml=`
+    <div class="sim-scenario active">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+        <div><div style="font-size:13px;font-weight:600">🔄 Escenario: ¿Y si alquilo ${scP.name}?</div><div style="font-size:11px;color:var(--text3)">Simulando alquiler vacacional en tu segundo inmueble</div></div>
+        <button class="b b-s" onclick="sim.scenarioOn=false;renderSimulador()">✕ Cerrar</button>
+      </div>
+      <div class="sim-row"><div class="sim-label"><div class="sim-label-t">Días alquilados</div><div class="sim-label-d">${scP.name}</div></div><div class="sim-slider"><input type="range" min="0" max="365" value="${sim.scDiasAlq}" oninput="sim.scDiasAlq=+this.value;renderSimulador()"/></div><div class="sim-val">${sim.scDiasAlq} días</div></div>
+      <div class="sim-row"><div class="sim-label"><div class="sim-label-t">Ingresos brutos</div></div><div class="sim-slider"><input type="range" min="0" max="60000" step="100" value="${sim.scIngresos}" oninput="sim.scIngresos=+this.value;renderSimulador()"/></div><div class="sim-val">${fmt(sim.scIngresos)} €</div></div>
+      <div class="sim-row" style="border-bottom:none"><div class="sim-label"><div class="sim-label-t">Gastos deducibles</div></div><div class="sim-slider"><input type="range" min="0" max="20000" step="50" value="${sim.scGastos}" oninput="sim.scGastos=+this.value;renderSimulador()"/></div><div class="sim-val">${fmt(sim.scGastos)} €</div></div>
+
+      <div style="margin-top:1rem;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+        <div class="kpi" style="margin:0"><div class="kpi-l">IRNR ${scP.name}</div><div class="kpi-v" style="font-size:20px">${fmt(scTotal)} €</div><div class="kpi-s warn">T35: ${fmt(scCuotaT35)} + T2: ${fmt(scCuotaT2)}</div></div>
+        <div class="kpi" style="margin:0"><div class="kpi-l">IRNR total combinado</div><div class="kpi-v" style="font-size:20px;color:var(--red-text)">${fmt(newGrandTotal)} €</div><div class="kpi-s err">Los 2 inmuebles</div></div>
+        <div class="kpi" style="margin:0"><div class="kpi-l">Ingresos totales</div><div class="kpi-v" style="font-size:20px;color:var(--green-mid)">${fmt(newIngresos)} €</div><div class="kpi-s up">Rendimiento neto: ${fmt(newIngresos-newGrandTotal)} €</div></div>
+      </div>
+    </div>`;
+  }
+
+  // ── Progress bars for composition ──
+  const maxRef=Math.max(cuotaT35, cuotaT2, cuotaSinGastos, 1);
+
+  $('simContent').innerHTML=`
+  <div class="sim-hero">
+    <h2>Simulador fiscal IRNR</h2>
+    <p>Mueve los deslizadores para ver en tiempo real cómo cambia tu cuota de IRNR. Todos los cálculos siguen la normativa vigente del Modelo 210.</p>
+  </div>
+
+  <div class="g2" style="align-items:start">
+    <div>
+      <!-- PROPERTY SELECTOR -->
+      <div class="c">
+        <div class="c-h">
+          <span class="c-t">Inmueble base</span>
+          <select class="fi" style="width:auto;padding:5px 28px 5px 10px;font-size:12px" onchange="sim.propIdx=+this.value;renderSimulador()">${D.props.map((pr,i)=>`<option value="${i}" ${i===sim.propIdx?'selected':''}>${pr.icon} ${pr.name}</option>`).join('')}</select>
+        </div>
+        <div style="display:flex;gap:12px;font-size:11px;color:var(--text2);margin-bottom:4px">
+          <span>VC: ${fmt(p.vc)} €</span>
+          <span>Imputación: ${p.tipImp}%</span>
+          <span>Tipo IRNR: ${rate}%</span>
+          <span>${D.user.zone==='UE'?'✅ Gastos deducibles (UE)':'⚠️ Sin deducción gastos'}</span>
+        </div>
+      </div>
+
+      <!-- SLIDERS -->
+      <div class="c">
+        <div class="c-h"><span class="c-t">Variables del ejercicio</span></div>
+
+        <div class="sim-row">
+          <div class="sim-label"><div class="sim-label-t">Días alquilados</div><div class="sim-label-d">Determina T35 y T2</div></div>
+          <div class="sim-slider"><input type="range" min="0" max="365" value="${sim.diasAlq}" oninput="sim.diasAlq=+this.value;renderSimulador()"/></div>
+          <div class="sim-val">${sim.diasAlq} <span style="font-size:11px;font-weight:400;color:var(--text3)">días</span></div>
+        </div>
+
+        <div class="sim-row">
+          <div class="sim-label"><div class="sim-label-t">Ingresos brutos</div><div class="sim-label-d">Alquiler vacacional</div></div>
+          <div class="sim-slider"><input type="range" min="0" max="80000" step="100" value="${sim.ingresos}" oninput="sim.ingresos=+this.value;renderSimulador()"/></div>
+          <div class="sim-val">${fmt(sim.ingresos)} <span style="font-size:11px;font-weight:400;color:var(--text3)">€</span></div>
+        </div>
+
+        <div class="sim-row" style="border-bottom:none">
+          <div class="sim-label"><div class="sim-label-t">Gastos deducibles</div><div class="sim-label-d">${D.user.zone==='UE'?'IBI, comunidad, seguro...':'No aplica (fuera UE)'}</div></div>
+          <div class="sim-slider"><input type="range" min="0" max="30000" step="50" value="${sim.gastos}" ${D.user.zone!=='UE'?'disabled':''} oninput="sim.gastos=+this.value;renderSimulador()"/></div>
+          <div class="sim-val">${fmt(sim.gastos)} <span style="font-size:11px;font-weight:400;color:var(--text3)">€</span></div>
+        </div>
+      </div>
+
+      <!-- SCENARIO -->
+      ${sim.scenarioOn?'':D.props.length>1?`
+      <div class="sim-scenario" onclick="sim.scenarioOn=true;renderSimulador()" style="cursor:pointer;text-align:center">
+        <div style="font-size:20px;margin-bottom:6px">🔄</div>
+        <div style="font-size:13px;font-weight:500">Simular escenario alternativo</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px">¿Qué pasa si alquilo también ${D.props.find((_,i)=>i!==sim.propIdx)?.name||'otro inmueble'}?</div>
+      </div>`:''}
+      ${scHtml}
+    </div>
+
+    <div>
+      <!-- RESULTS -->
+      <div class="c" style="padding:0;overflow:hidden">
+        <div style="background:var(--green);padding:1.25rem 1.5rem;color:#ecfdf5">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--green-soft);font-weight:500;margin-bottom:6px">Cuota IRNR total estimada</div>
+          <div class="sim-big" style="color:#ecfdf5;font-size:36px">${fmt(totalIRNR)} €</div>
+          <div style="font-size:11px;color:var(--green-soft);margin-top:4px">Ejercicio 2024 · ${p.name}</div>
+        </div>
+        <div style="padding:1.25rem 1.5rem">
+          <div class="sim-result-row" style="padding:10px 0;border-bottom:1px solid var(--border)">
+            <div><div style="font-size:12px;font-weight:500">M210 · Tipo 35 — Alquiler</div><div style="font-size:10px;color:var(--text3)">${sim.diasAlq} días · Base: ${fmt(baseT35)} € × ${rate}%</div></div>
+            <div style="font-size:18px;font-weight:600;color:var(--red-text)">${fmt(cuotaT35)} €</div>
+          </div>
+          <div class="sim-result-row" style="padding:10px 0;border-bottom:1px solid var(--border)">
+            <div><div style="font-size:12px;font-weight:500">M210 · Tipo 2 — Imputada</div><div style="font-size:10px;color:var(--text3)">${diasImp} días · Base: ${fmt(baseT2)} € × ${rate}%</div></div>
+            <div style="font-size:18px;font-weight:600">${fmt(cuotaT2)} €</div>
+          </div>
+          <div class="sim-result-row" style="padding:10px 0">
+            <div style="font-size:12px;color:var(--text2)">Rendimiento neto (ingresos − IRNR)</div>
+            <div style="font-size:18px;font-weight:600;color:var(--green-mid)">${fmt(sim.ingresos - totalIRNR)} €</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COMPARISON: with vs without expenses -->
+      <div class="c" style="padding:0;overflow:hidden">
+        <div style="padding:1rem 1.5rem;border-bottom:1px solid var(--border)">
+          <div style="font-size:13px;font-weight:500">Impacto de los gastos deducibles</div>
+          <div style="font-size:11px;color:var(--text3)">Comparativa T35 con y sin deducción de gastos</div>
+        </div>
+        <div class="sim-compare">
+          <div class="sim-compare-col">
+            <div class="sim-compare-label">Sin deducir gastos</div>
+            <div class="sim-compare-val">${fmt(cuotaSinGastos)} €</div>
+            <div class="sim-compare-sub">Base: ${fmt(sim.ingresos)} € × ${rate}%</div>
+          </div>
+          <div class="sim-compare-col">
+            <div class="sim-compare-label">Deduciendo gastos</div>
+            <div class="sim-compare-val">${fmt(cuotaT35)} €</div>
+            <div class="sim-compare-sub">Base: ${fmt(baseT35)} € × ${rate}%</div>
+          </div>
+        </div>
+        <div style="padding:1rem 1.5rem;text-align:center;background:var(--surface2)">
+          <span style="font-size:12px;color:var(--text2)">Ahorro por deducir gastos: </span>
+          <span style="font-size:16px;font-weight:600;color:var(--green-mid)">${fmt(ahorro)} €</span>
+          <span style="font-size:11px;color:var(--text3);margin-left:4px">(${ahorro>0?'-'+Math.round(ahorro/cuotaSinGastos*100)+'%':'0%'})</span>
+        </div>
+      </div>
+
+      <!-- VISUAL BREAKDOWN -->
+      <div class="c">
+        <div class="c-h"><span class="c-t">Composición de la cuota</span></div>
+        <div style="margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span style="color:var(--text2)">T35 · Alquiler</span><span style="font-weight:500">${fmt(cuotaT35)} €</span></div>
+          <div class="sim-bar-track"><div class="sim-bar-fill" style="width:${Math.max(2,cuotaT35/(cuotaT35+cuotaT2)*100)}%;background:var(--red-mid)">${Math.round(cuotaT35/(totalIRNR||1)*100)}%</div></div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span style="color:var(--text2)">T2 · Imputada</span><span style="font-weight:500">${fmt(cuotaT2)} €</span></div>
+          <div class="sim-bar-track"><div class="sim-bar-fill" style="width:${Math.max(2,cuotaT2/(cuotaT35+cuotaT2)*100)}%;background:var(--amber-text)">${Math.round(cuotaT2/(totalIRNR||1)*100)}%</div></div>
+        </div>
+        <div class="hr"></div>
+        <div style="font-size:11px;color:var(--text3);line-height:1.6">
+          📐 <b style="color:var(--text)">Fórmula T35:</b> (Ingresos ${fmt(sim.ingresos)} − Gastos ${fmt(sim.gastos)}) × ${rate}% = ${fmt(cuotaT35)} €<br/>
+          📐 <b style="color:var(--text)">Fórmula T2:</b> VC ${fmt(p.vc)} × ${p.tipImp}% × ${diasImp}/365 × ${rate}% = ${fmt(cuotaT2)} €
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ═══════════════ PLAN PAGE (full render) ═══════════════
+function renderPlan(){
+  const a=D.account, n=D.props.length;
+  const totalIRNR=D.props.reduce((s,p)=>s+p.decl.reduce((ac,d)=>ac+d.cuota,0),0);
+  const m210Count=D.props.reduce((s,p)=>s+p.decl.length,0);
+  const isPro=a.plan==='annual'||dev;
+
+  // Simulate pro data when dev mode
+  const proInvoices=isPro?[
+    {id:'INV-2025-003',date:'15 mar 2025',concept:'Plan anual · Mar 2025',amount:100,status:'ok',pdf:true},
+    {id:'INV-2025-002',date:'15 feb 2025',concept:'Plan anual · Feb 2025',amount:100,status:'ok',pdf:true},
+    {id:'INV-2025-001',date:'15 ene 2025',concept:'Plan anual + Regularización sep–dic',amount:133,status:'ok',pdf:true},
+    {id:'INV-2024-002',date:'20 ene 2025',concept:'Presentación M210 T35 · Apto. Estepona',amount:5,status:'ok',pdf:true},
+    ...a.invoices
+  ]:a.invoices;
+  // Store globally for bulk download
+  window._invoices=proInvoices;
+
+  const saldo=isPro?12.50:0;
+  const nextPay=isPro?{date:'15 abr 2025',amount:100,concept:'Plan anual · Abr 2025'}:null;
+  const totalPaid=proInvoices.reduce((s,i)=>s+i.amount,0);
+
+  let html=`
+  <!-- HERO SALDO -->
+  <div style="display:grid;grid-template-columns:${isPro?'1fr 1fr 1fr':'1fr 1fr'};gap:1rem;margin-bottom:1.5rem">
+    <div class="c" style="background:${isPro?'linear-gradient(135deg,var(--green),#065f46)':'var(--surface2)'};border:none;color:${isPro?'#ecfdf5':'var(--text)'}">
+      <div style="font-size:11px;${isPro?'color:var(--green-soft)':'color:var(--text3)'};margin-bottom:8px">Plan actual</div>
+      <div style="font-size:22px;font-weight:600;letter-spacing:-.4px;margin-bottom:4px">${isPro?'Plan Anual':'Gratuito'}</div>
+      <div style="font-size:12px;${isPro?'color:var(--green-soft)':'color:var(--text2)'}">${n} inmuebles · ${isPro?'Todo desbloqueado':'Dashboard fiscal'}</div>
+      ${isPro?`<div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.15);display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--green-soft)">Cliente desde</span><span style="font-weight:500">Sep 2024</span></div>`:''}
+    </div>
+    <div class="c">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px">Saldo en cuenta</div>
+      <div style="font-size:28px;font-weight:600;letter-spacing:-.5px;color:${saldo>0?'var(--green-mid)':'var(--text)'}">${saldo.toFixed(2).replace('.',',')} €</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:4px">${saldo>0?'Disponible para compensar en próximo cargo':'Sin saldo acumulado'}</div>
+      ${isPro?`<button class="b b-s" style="margin-top:10px" onclick="toast('Saldo: próximamente podrás añadir saldo prepago','w')">+ Añadir saldo</button>`:''}
+    </div>
+    ${isPro?`<div class="c">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px">Próximo cargo</div>
+      <div style="font-size:22px;font-weight:600;letter-spacing:-.4px">${fmt(nextPay.amount)} €</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:4px">${nextPay.date} · ${nextPay.concept}</div>
+      <div style="margin-top:10px;display:flex;gap:6px">
+        <button class="b b-s b-ghost" onclick="toast('Próximo cargo: 15 abr 2025. Contacta con soporte para modificar.','w')">Cambiar fecha</button>
+        <button class="b b-s b-ghost" onclick="pausarPlan()">Pausar plan</button>
+      </div>
+    </div>`:''}
+  </div>`;
+
+  // If free: show upgrade CTA + calculator
+  if(!isPro){
+    html+=`
+    <div class="al al-w" style="margin-bottom:1.25rem">⚠️ <div><b>Módulos bloqueados</b> Activa el plan anual para desbloquear actividad económica, gestión de reservas y presentación automática del M210.</div></div>
+    <div class="g2" style="align-items:start">
+      <div>
+        <div class="c">
+          <div class="c-h"><span class="c-t">Calculadora plan anual</span></div>
+          <div class="f2">
+            <div class="fg"><label class="fl">Inmuebles</label><div class="stepper"><button class="b b-s" onclick="pChange('inm',-1)">−</button><span class="stepper-v" id="pInm">${pI}</span><button class="b b-s" onclick="pChange('inm',1)">+</button></div></div>
+            <div class="fg"><label class="fl">Modelos M210</label><div class="stepper"><button class="b b-s" onclick="pChange('mod',-1)">−</button><span class="stepper-v" id="pMod">${pM}</span><button class="b b-s" onclick="pChange('mod',1)">+</button></div><span class="fh">piso + garaje + trastero = 3 modelos</span></div>
+          </div>
+          <div class="fg"><label class="fl">Mes de inicio</label><select class="fi" id="pMes" onchange="pCalc()"><option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option><option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option><option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option><option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option></select></div>
+          <div id="pResult" style="background:var(--surface2);border-radius:var(--r);padding:1rem;margin-bottom:1rem"></div>
+          <button class="b b-g" style="width:100%;justify-content:center;padding:10px;font-size:13px" onclick="contratarPlan()">💳 Contratar plan anual</button>
+          <div style="font-size:11px;color:var(--text3);text-align:center;margin-top:8px">Sin permanencia · Cancela cuando quieras</div>
+        </div>
+      </div>
+      <div>
+        <div class="c">
+          <div class="c-h"><span class="c-t">¿Qué incluye?</span></div>
+          <div style="display:flex;flex-direction:column;gap:8px;font-size:12px">
+            <div class="pf" style="background:var(--green-pale)"><div style="font-weight:500;color:var(--green);margin-bottom:4px">💰 Actividad económica</div><div style="color:var(--green-text);line-height:1.5">Reservas Booking/Airbnb/directo · Calendario · Gastos · Informes</div></div>
+            <div class="pf" style="background:var(--blue)"><div style="font-weight:500;color:var(--blue-text);margin-bottom:4px">📋 Presentación M210</div><div style="color:var(--blue-text);line-height:1.5">ResidIA presenta ante la AEAT · Tipo 2 y 35 · +5€/modelo</div></div>
+            <div class="pf" style="background:var(--surface2)"><div style="font-weight:500;color:var(--text);margin-bottom:4px">📊 Todo lo gratuito</div><div style="color:var(--text2);line-height:1.5">Dashboard · Catastrales · Alertas · Documentos · Checklist</div></div>
+          </div>
+        </div>
+        <div class="c" style="background:var(--green-pale);border-color:var(--green-soft)">
+          <div style="font-size:12px;font-weight:500;color:var(--green);margin-bottom:6px">💡 Ahorro estimado</div>
+          <div style="font-size:12px;color:var(--green-text);line-height:1.6">Un gestor fiscal tradicional cobra entre <b>300–600 €</b> por la declaración M210 de un solo inmueble. Con ResidIA gestionas ${n} inmuebles por <b>${n*50} €/año</b> + 5€/modelo presentado.</div>
+          <div style="margin-top:10px;display:flex;align-items:center;gap:8px">
+            <div style="font-size:20px;font-weight:600;color:var(--green)">${fmt(a.savedVsGestor)} €</div>
+            <div style="font-size:11px;color:var(--green-text)">ahorro estimado anual<br/>vs gestor tradicional</div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // If pro: show billing details, M210 costs, payment method, invoices
+  if(isPro){
+    // M210 presentation costs breakdown
+    let m210Rows=a.m210Pending.map(m=>`<div class="dr"><span class="dr-l">${m.prop} · ${m.tipo} ${m.year}</span><span><span class="bd ${m.status==='paid'?'bd-g':'bd-a'}">${m.status==='paid'?'Pagado':'Pendiente'}</span> <b style="margin-left:6px">${m.amount} €</b></span></div>`).join('');
+    const m210Total=a.m210Pending.reduce((s,m)=>s+m.amount,0);
+    const m210Paid=a.m210Pending.filter(m=>m.status==='paid').reduce((s,m)=>s+m.amount,0);
+
+    html+=`<div class="g2" style="align-items:start">
+      <div>
+        <!-- DESGLOSE COSTES -->
+        <div class="c">
+          <div class="c-h"><span class="c-t">Desglose de costes 2024–2025</span></div>
+          <div class="dr"><span class="dr-l">Plan anual (${n} inm. × 50€)</span><span class="dr-v">${fmt(n*50)} €/año</span></div>
+          <div class="dr"><span class="dr-l">Coste mensual equivalente</span><span class="dr-v" style="color:var(--green-mid)">${(n*50/12).toFixed(2).replace('.',',')} €/mes</span></div>
+          <div class="hr"></div>
+          <div style="font-size:11px;font-weight:500;color:var(--text2);margin-bottom:8px">Presentación M210 (se cobra al presentar)</div>
+          ${m210Rows}
+          <div class="hr"></div>
+          <div class="dr" style="border-bottom:none;font-weight:500;font-size:13px"><span>Total M210 pendiente</span><span style="color:var(--amber-text)">${fmt(m210Total-m210Paid)} €</span></div>
+        </div>
+
+        <!-- AHORRO -->
+        <div class="c" style="background:var(--green-pale);border-color:var(--green-soft)">
+          <div style="display:flex;align-items:center;gap:14px">
+            <div>
+              <div style="font-size:36px;font-weight:600;color:var(--green);letter-spacing:-1px">${fmt(a.savedVsGestor)} €</div>
+              <div style="font-size:11px;color:var(--green-text);margin-top:2px">ahorro estimado vs gestor tradicional</div>
+            </div>
+            <div style="flex:1;font-size:11px;color:var(--green-text);line-height:1.5;padding-left:14px;border-left:1px solid var(--green-soft)">
+              Gestor promedio: ~400 €/inmueble<br/>
+              Tu coste ResidIA: ${n*50+m210Total} € total<br/>
+              <b style="color:var(--green)">Ahorras un ${Math.round(a.savedVsGestor/(a.savedVsGestor+n*50+m210Total)*100)}%</b>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <!-- MÉTODO DE PAGO -->
+        <div class="c">
+          <div class="c-h"><span class="c-t">Método de pago</span><button class="b b-s" onclick="cambiarMetodoPago()">Cambiar</button></div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface2);border-radius:var(--r)">
+            <div style="width:42px;height:28px;background:linear-gradient(135deg,#1a1f71,#2e77bc);border-radius:4px;display:flex;align-items:center;justify-content:center;color:white;font-size:9px;font-weight:700;letter-spacing:.5px">VISA</div>
+            <div><div style="font-size:12px;font-weight:500">•••• •••• •••• 4821</div><div style="font-size:10px;color:var(--text3)">Caduca 09/27 · Johan Henriksson</div></div>
+          </div>
+          <div style="margin-top:10px;font-size:11px;color:var(--text3);display:flex;align-items:center;gap:6px">
+            <span style="color:var(--green-mid)">🔒</span> Pagos procesados de forma segura mediante Stripe
+          </div>
+        </div>
+
+        <!-- HISTORIAL FACTURAS -->
+        <div class="c">
+          <div class="c-h"><span class="c-t">Historial de pagos</span><span class="bd bd-0">${proInvoices.length} facturas</span></div>
+          <div style="font-size:11px;color:var(--text2);margin-bottom:10px">Total pagado: <b style="color:var(--text)">${fmt(totalPaid)} €</b></div>
+          <table>
+            <thead><tr><th>Fecha</th><th>Concepto</th><th>Importe</th><th>Estado</th><th></th></tr></thead>
+            <tbody>${proInvoices.map(inv=>`<tr>
+              <td style="white-space:nowrap">${inv.date}</td>
+              <td>${inv.concept}</td>
+              <td style="font-weight:500">${inv.amount>0?fmt(inv.amount)+' €':'Gratis'}</td>
+              <td><span class="bd ${inv.status==='ok'?'bd-g':'bd-a'}">${inv.status==='ok'?'Pagado':'Pendiente'}</span></td>
+              <td>${inv.pdf?`<button class="b b-s" onclick="generateInvoice('${inv.id}','${inv.date}','${inv.concept.replace(/'/g,"\\'")}',${inv.amount})">📥 PDF</button>`:''}</td>
+            </tr>`).join('')}</tbody>
+          </table>
+        </div>
+
+        <!-- GESTIÓN SUSCRIPCIÓN -->
+        <div class="c">
+          <div class="c-h"><span class="c-t">Gestionar suscripción</span></div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <button class="b b-s" style="justify-content:flex-start;width:100%" onclick="cambiarEmailFact()">📧 Cambiar email de facturación</button>
+            <button class="b b-s" style="justify-content:flex-start;width:100%" onclick="cambiarMetodoPago()">🏦 Cambiar datos bancarios para devoluciones AEAT</button>
+            <button class="b b-s" style="justify-content:flex-start;width:100%" onclick="(window._invoices||[]).filter(i=>i.pdf&&i.amount>0).forEach(i=>generateInvoice(i.id,i.date,i.concept,i.amount));toast('Facturas generadas','ok')">📋 Descargar todas las facturas</button>
+            <div class="hr"></div>
+            <button class="b b-s" style="justify-content:flex-start;width:100%;color:var(--red-text);border-color:var(--red)" onclick="pausarPlan()">⏸️ Pausar suscripción</button>
+            <button class="b b-s" style="justify-content:flex-start;width:100%;color:var(--text3)" onclick="cancelarPlan()">✕ Cancelar plan</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  $('planContent').innerHTML=html;
+  // Re-run calculator if free plan
+  if(!isPro && $('pMes')) pCalc();
+}
+
+let pI=2,pM=2;
+function pChange(t,d){
+  if(t==='inm')pI=Math.max(1,pI+d);else pM=Math.max(1,pM+d);
+  if($('pInm'))$('pInm').textContent=pI;
+  if($('pMod'))$('pMod').textContent=pM;
+  const el=$(t==='inm'?'pInm':'pMod');
+  if(el){el.style.transform='scale(1.2)';setTimeout(()=>el.style.transform='scale(1)',150)}
+  pCalc();
+}
+function pCalc(){
+  if(!$('pMes')||!$('pResult'))return;
+  const m=+$('pMes').value,mR=m-1,a=pI*50,r=Math.round(a/12*mR),m210=pM*5;
+  const mN=['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  let h=`<div class="dr"><span class="dr-l">Plan anual (${pI} inm. × 50€)</span><b>${a} €/año</b></div>`;
+  if(mR>0)h+=`<div class="dr"><span class="dr-l">Regularización ene–${mN[m-1]} (${mR} m.)</span><b style="color:var(--amber-text)">+${r} €</b></div>`;
+  h+=`<div class="dr"><span class="dr-l">Presentación M210 (${pM} × 5€)</span><b>${m210} € <span style="font-weight:400;font-size:10px;color:var(--text3)">en enero sig.</span></b></div>`;
+  h+=`<div class="dr" style="border-bottom:none;padding-top:8px;font-weight:500;font-size:13px"><span>Primer pago (${mN[m]})</span><span style="color:var(--green);font-size:16px">${a+r} €</span></div>`;
+  h+=`<div style="font-size:11px;color:var(--text2);margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">${mR===0?'✅ Sin regularización — empiezas desde enero.':'ℹ️ Incluye '+mR+' meses de regularización (ene–'+mN[m-1]+').'}</div>`;
+  $('pResult').innerHTML=h;
+}
+
+// ═══════════════ DEV MODE ═══════════════
+function toggleDev(){
+  dev=!dev;
+  document.body.classList.toggle('dev',dev);
+  $('devBtn').classList.toggle('on',dev);
+  $('devLbl').textContent=dev?'ON':'Dev';
+  if(!dev){
+    const ap=document.querySelector('.pg.on');
+    if(ap&&['pg-ingresos','pg-calendario','pg-gastos'].includes(ap.id))go('resumen');
+  }
+  renderSbFoot();
+  renderPlan();
+  toast(dev?'Dev mode ON — todo desbloqueado':'Dev mode OFF','ok');
+}
+
+// ═══════════════ SIDEBAR MOBILE ═══════════════
+function openSb(){$('sb').classList.add('open');$('ov').classList.add('on');document.body.style.overflow='hidden'}
+function closeSb(){$('sb').classList.remove('open');$('ov').classList.remove('on');document.body.style.overflow=''}
+function toast(m,t){const el=$('toast');el.textContent=m;el.className='toast toast-'+t+' show';setTimeout(()=>el.classList.remove('show'),2500)}
+
+// ═══════════════ RENTAL INVOICE GENERATOR ═══════════════
+// FISCAL ENGINE — determines IVA and retención automatically
+function fiscalEngine(prop, reserva){
+  const alq = prop.alquiler || {};
+  const rules = { iva:0, ivaRate:0, ivaMotivo:'', ret:false, retRate:0, retMotivo:'', warnings:[], errors:[], notas:[] };
+
+  // ── IVA RULES ──
+  // Art. 20.Uno.23º LIVA: arrendamiento de vivienda exento, SALVO si se prestan servicios
+  // complementarios propios de industria hotelera (limpieza durante estancia, recepción, etc.)
+  if(alq.tipo==='turistico' && !alq.servicios){
+    rules.ivaRate=0;
+    rules.ivaMotivo='Exento de IVA — arrendamiento turístico sin servicios hoteleros (art. 20.1.23º LIVA)';
+    rules.notas.push('Alquiler turístico sin servicios complementarios: exento de IVA conforme al art. 20.Uno.23º de la Ley 37/1992 del IVA.');
+  } else if(alq.tipo==='turistico' && alq.servicios){
+    rules.ivaRate=10;
+    rules.ivaMotivo='IVA 10% — alojamiento turístico con servicios hoteleros (art. 91.Uno.2.2º LIVA)';
+    rules.notas.push('Al prestar servicios complementarios (limpieza durante estancia, recepción, etc.), se aplica el tipo reducido del 10% de IVA.');
+  } else if(alq.tipo==='larga_estancia'){
+    rules.ivaRate=0;
+    rules.ivaMotivo='Exento de IVA — arrendamiento de vivienda habitual (art. 20.1.23º LIVA)';
+    rules.notas.push('Arrendamiento de vivienda para uso habitual del arrendatario: exento de IVA.');
+  }
+
+  // ── RETENCIÓN IRPF RULES ──
+  // Art. 31.1 LIRNR: obligación de retener cuando el pagador es empresa/profesional español
+  if(reserva.tipoArr==='empresa_es'){
+    rules.ret=true;
+    rules.retRate=19;
+    rules.retMotivo='Retención 19% obligatoria — arrendatario es empresa/profesional español (art. 31.1 LIRNR)';
+    rules.notas.push('El arrendatario, al ser empresa o profesional con establecimiento en España, está obligado a practicar retención del 19% sobre las rentas del arrendamiento e ingresarla mediante modelo 216.');
+  } else if(reserva.tipoArr==='profesional_es'){
+    rules.ret=true;
+    rules.retRate=19;
+    rules.retMotivo='Retención 19% obligatoria — arrendatario es profesional español obligado a retener';
+  } else if(reserva.tipoArr==='particular_ext'){
+    rules.ret=false;
+    rules.retMotivo='Sin retención — arrendatario es particular no residente/extranjero, sin obligación de retener';
+  } else if(reserva.tipoArr==='particular_es'){
+    rules.ret=false;
+    rules.retMotivo='Sin retención — particular sin obligación de retener';
+    rules.notas.push('Los particulares no están obligados a practicar retención. El propietario declarará los rendimientos mediante el modelo 210.');
+  } else {
+    rules.ret=false;
+    rules.retMotivo='Sin retención aplicable';
+  }
+
+  // ── VALIDACIONES ──
+  if(!prop.alquiler || !prop.alquiler.licencia){
+    rules.warnings.push('Este inmueble no tiene licencia turística registrada. Es obligatoria en la mayoría de CCAA para alquiler vacacional.');
+  }
+  if(!D.user.nie){
+    rules.warnings.push('No tienes NIE registrado. Será necesario para la presentación del M210 asociado a estos ingresos.');
+  }
+  if(reserva.canal==='Booking' || reserva.canal==='Airbnb'){
+    rules.notas.push('Las plataformas ('+reserva.canal+') pueden retener e ingresar impuestos en determinadas jurisdicciones. Verifica en tu extracto de la plataforma si ya se ha practicado alguna retención o ingreso fiscal.');
+  }
+  if(reserva.noches > 31 && alq.tipo==='turistico'){
+    rules.errors.push('Estancia de '+reserva.noches+' noches en un inmueble configurado como turístico. Las estancias superiores a 31 días pueden requerir contrato de larga estancia. Revisa la configuración del inmueble.');
+  }
+
+  // Calculate amounts
+  const base = reserva.imp;
+  rules.iva = Math.round(base * rules.ivaRate / 100 * 100) / 100;
+  const retAmt = rules.ret ? Math.round(base * rules.retRate / 100 * 100) / 100 : 0;
+  rules.total = base + rules.iva - retAmt;
+  rules.retAmount = retAmt;
+  rules.base = base;
+
+  return rules;
+}
+
+function openRentalInvoice(idx){
+  const r = D.reservas[idx];
+  const u = D.user;
+  const p = D.props.find(pr=>pr.name===r.prop) || D.props[0];
+
+  // Only direct rentals need an invoice from the owner
+  if(r.canal!=='Directo'){
+    toast('Las reservas vía '+r.canal+' no requieren factura propia — la plataforma emite la liquidación','w');
+    return;
+  }
+
+  const f = fiscalEngine(p, r);
+
+  // If there are blocking errors, show them and don't generate
+  if(f.errors.length){
+    toast('⛔ '+f.errors[0],'w');
+    return;
+  }
+
+  const tipoArrLabel = {
+    'particular_ext':'Particular · No residente',
+    'particular_es':'Particular · Residente en España',
+    'empresa_es':'Empresa/profesional · España',
+    'profesional_es':'Profesional · España'
+  }[r.tipoArr] || r.tipoArr;
+
+  const warningsHtml = f.warnings.length ? f.warnings.map(w=>`<div style="background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:12px 16px;margin-bottom:12px;font-size:11px;color:#78350f;line-height:1.6"><b>⚠️ Aviso de ResidIA:</b> ${w}</div>`).join('') : '';
+
+  const notasHtml = f.notas.map(n=>`<li>${n}</li>`).join('');
+
+  const html=`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"/><title>Factura ${r.id}</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Helvetica Neue',Arial,sans-serif;color:#141414;padding:40px 50px;max-width:820px;margin:0 auto;font-size:13px;line-height:1.6}
+.hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:36px;padding-bottom:20px;border-bottom:2px solid #064e3b}
+.logo{font-size:22px;font-weight:700;letter-spacing:-.4px}.logo em{font-style:normal;color:#10b981}
+.inv-r{text-align:right;font-size:12px;color:#5c5c5c}.inv-r strong{display:block;font-size:17px;color:#141414;margin-bottom:2px}
+.parties{display:grid;grid-template-columns:1fr 1fr;gap:36px;margin-bottom:28px}
+.pl{font-size:9px;text-transform:uppercase;letter-spacing:1.2px;color:#a0a0a0;font-weight:600;margin-bottom:6px}
+.pn{font-size:14px;font-weight:600;margin-bottom:3px}
+.pd{font-size:12px;color:#5c5c5c;line-height:1.7}
+.cbox{background:#f6f5f2;border-radius:10px;padding:16px 20px;margin-bottom:24px}
+.clbl{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#a0a0a0;font-weight:600;margin-bottom:8px}
+.cprop{font-size:15px;font-weight:600;margin-bottom:2px}.caddr{font-size:12px;color:#5c5c5c}.cref{font-size:11px;color:#a0a0a0;margin-top:2px}
+.fiscal-tag{display:inline-block;font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;margin:2px 4px 2px 0}
+.tag-green{background:#ecfdf5;color:#065f46}.tag-amber{background:#fef3c7;color:#92400e}.tag-blue{background:#eff6ff;color:#1e40af}
+table{width:100%;border-collapse:collapse;margin-bottom:20px}
+th{text-align:left;padding:10px 14px;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:#a0a0a0;font-weight:600;border-bottom:1px solid #e5e5e5}
+td{padding:11px 14px;border-bottom:1px solid #f0f0f0}.ar{text-align:right;font-variant-numeric:tabular-nums}
+.totals{display:flex;justify-content:flex-end;margin-bottom:28px}
+.tb{width:300px}
+.tr{display:flex;justify-content:space-between;padding:5px 0;font-size:12px;color:#5c5c5c}.tr b{color:#141414}
+.tr.fin{padding:10px 0;margin-top:6px;border-top:2px solid #064e3b;font-size:16px;font-weight:700;color:#141414}
+.tr .sub{font-size:10px;color:#a0a0a0;margin-top:1px}
+.legal{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px 18px;font-size:10.5px;color:#475569;line-height:1.7;margin-bottom:16px}
+.legal b{color:#1e293b;font-weight:600}
+.legal ul{margin:6px 0 0 16px}
+.legal li{margin-bottom:3px}
+.repr{background:#f6f5f2;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:11px;color:#5c5c5c;line-height:1.7}
+.repr b{color:#141414}
+.foot{margin-top:30px;padding-top:14px;border-top:1px solid #e5e5e5;font-size:10px;color:#a0a0a0;text-align:center;line-height:1.8}
+.pbtn{position:fixed;bottom:20px;right:20px;padding:10px 20px;background:#064e3b;color:#ecfdf5;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(6,78,59,.25)}
+.pbtn:hover{opacity:.9}
+@media print{.pbtn,.no-print{display:none!important}}
+</style></head><body>
+<button class="pbtn" onclick="window.print()">🖨️ Imprimir / Guardar PDF</button>
+
+<div class="hdr">
+  <div>
+    <div class="logo">Resid<em>IA</em></div>
+    <div style="font-size:11px;color:#5c5c5c;margin-top:3px">Factura de arrendamiento${p.alquiler&&p.alquiler.tipo==='turistico'?' turístico':''}</div>
+  </div>
+  <div class="inv-r">
+    <strong>FACTURA ${r.id}</strong>
+    Fecha emisión: ${r.fechas.split('–')[0].trim()} 2025<br/>
+    Periodo: ${r.fechas}
+  </div>
+</div>
+
+${warningsHtml}
+
+<div class="parties">
+  <div>
+    <div class="pl">Arrendador (propietario)</div>
+    <div class="pn">${u.name}</div>
+    <div class="pd">
+      ${u.nie?'NIE: '+u.nie:'Pasaporte: '+u.passport}<br/>
+      ${u.addr}<br/>
+      ${u.country} · No residente fiscal en España
+    </div>
+  </div>
+  <div>
+    <div class="pl">Arrendatario</div>
+    <div class="pn">${r.h}</div>
+    <div class="pd">
+      ${r.nif.startsWith('B-')?'CIF':'Doc. identidad'}: ${r.nif}<br/>
+      <span class="fiscal-tag tag-blue">${tipoArrLabel}</span><br/>
+      Canal: ${r.canal} · Ref: ${r.id}
+    </div>
+  </div>
+</div>
+
+<div class="cbox">
+  <div class="clbl">Inmueble arrendado</div>
+  <div class="cprop">${p.type} — ${p.name}</div>
+  <div class="caddr">${p.addr}, ${p.city}</div>
+  <div class="cref">
+    Ref. catastral: ${p.ref} · Propiedad: ${p.pct}%
+    ${p.alquiler&&p.alquiler.licencia?' · Licencia: '+p.alquiler.licencia:''}
+  </div>
+  <div style="margin-top:8px">
+    <span class="fiscal-tag ${f.ivaRate>0?'tag-amber':'tag-green'}">${f.ivaRate>0?'IVA '+f.ivaRate+'%':'Exento IVA'}</span>
+    <span class="fiscal-tag ${f.ret?'tag-amber':'tag-green'}">${f.ret?'Retención '+f.retRate+'%':'Sin retención'}</span>
+    ${p.alquiler?`<span class="fiscal-tag tag-blue">${p.alquiler.tipo==='turistico'?'Turístico':'Larga estancia'}${p.alquiler.servicios?' · Con servicios':''}</span>`:''}
+  </div>
+</div>
+
+<table>
+  <thead><tr><th>Concepto</th><th>Noches</th><th class="ar">Precio/noche</th><th class="ar">Importe</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>Alojamiento — ${p.name}<br/><span style="font-size:11px;color:#5c5c5c">${r.fechas} · ${r.canal}</span></td>
+      <td>${r.noches}</td>
+      <td class="ar">${fmt(r.pNoche)} €</td>
+      <td class="ar">${fmt(f.base)} €</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="totals"><div class="tb">
+  <div class="tr"><span>Base imponible</span><b>${f.base.toFixed(2).replace('.',',')} €</b></div>
+  ${f.ivaRate>0?`<div class="tr"><span>IVA (${f.ivaRate}%)<div class="sub">${f.ivaMotivo.split('—')[0]}</div></span><b>+${f.iva.toFixed(2).replace('.',',')} €</b></div>`:`<div class="tr"><span>IVA<div class="sub">Exento</div></span><b style="color:#065f46">0,00 €</b></div>`}
+  ${f.ret?`<div class="tr"><span>Retención IRPF (${f.retRate}%)<div class="sub">Obligatoria · art. 31.1 LIRNR</div></span><b style="color:#b91c1c">−${f.retAmount.toFixed(2).replace('.',',')} €</b></div>`:''}
+  <div class="tr fin"><span>Total${f.ret?' a percibir':''}</span><span>${f.total.toFixed(2).replace('.',',')} €</span></div>
+</div></div>
+
+<div class="legal">
+  <b>Fundamentación fiscal aplicada por ResidIA:</b>
+  <ul>${notasHtml}</ul>
+  <div style="margin-top:8px">
+    <b>IVA:</b> ${f.ivaMotivo}<br/>
+    <b>Retención:</b> ${f.retMotivo}
+  </div>
+</div>
+
+<div class="repr">
+  <b>Representante fiscal</b><br/>
+  ${D.company.name} · CIF: ${D.company.cif} · ${D.asesor.name}<br/>
+  ${D.company.addr}
+</div>
+
+<div class="foot">
+  Factura generada automáticamente por ResidIA · Las reglas fiscales se aplican según la configuración del inmueble y el tipo de arrendatario.<br/>
+  Documento válido como justificante de ingresos para el Modelo 210 (IRNR).
+</div>
+</body></html>`;
+
+  const w=window.open('','_blank');
+  if(w){w.document.write(html);w.document.close()}
+  else toast('Permite ventanas emergentes para generar la factura','w');
+}
+
+// ═══════════════ INVOICE GENERATOR ═══════════════
+function generateInvoice(id, date, concept, amount){
+  const iva = Math.round(amount * 0.21 * 100) / 100;
+  const base = Math.round((amount / 1.21) * 100) / 100;
+  const u = D.user;
+  const invoiceHTML = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"/><title>Factura ${id}</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Helvetica Neue',Arial,sans-serif;color:#141414;padding:40px 50px;max-width:800px;margin:0 auto;font-size:13px;line-height:1.6}
+.header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:40px;padding-bottom:24px;border-bottom:2px solid #064e3b}
+.logo{font-size:24px;font-weight:700;letter-spacing:-.5px}.logo em{font-style:normal;color:#10b981}
+.inv-id{text-align:right;font-size:12px;color:#5c5c5c}
+.inv-id strong{display:block;font-size:18px;color:#141414;margin-bottom:2px}
+.parties{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-bottom:36px}
+.party-label{font-size:10px;text-transform:uppercase;letter-spacing:1.2px;color:#a0a0a0;font-weight:600;margin-bottom:6px}
+.party-name{font-size:14px;font-weight:600;margin-bottom:4px}
+.party-detail{font-size:12px;color:#5c5c5c;line-height:1.7}
+table{width:100%;border-collapse:collapse;margin-bottom:24px}
+th{text-align:left;padding:10px 14px;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#a0a0a0;font-weight:600;border-bottom:1px solid #e5e5e5}
+td{padding:12px 14px;border-bottom:1px solid #f0f0f0;font-size:13px}
+.amount-col{text-align:right;font-variant-numeric:tabular-nums}
+.totals{display:flex;justify-content:flex-end;margin-bottom:36px}
+.totals-box{width:260px}
+.total-row{display:flex;justify-content:space-between;padding:6px 0;font-size:12px;color:#5c5c5c}
+.total-row.final{padding:10px 0;margin-top:6px;border-top:2px solid #064e3b;font-size:15px;font-weight:700;color:#141414}
+.footer{margin-top:40px;padding-top:20px;border-top:1px solid #e5e5e5;font-size:10px;color:#a0a0a0;text-align:center;line-height:1.8}
+.badge{display:inline-block;background:#ecfdf5;color:#065f46;font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;margin-left:8px}
+@media print{body{padding:20px}button{display:none!important}}
+.print-btn{position:fixed;bottom:24px;right:24px;padding:10px 20px;background:#064e3b;color:#ecfdf5;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(6,78,59,.25)}
+.print-btn:hover{opacity:.9}
+</style></head><body>
+<button class="print-btn" onclick="window.print()">🖨️ Imprimir / Guardar PDF</button>
+<div class="header">
+  <div><div class="logo">Resid<em>IA</em></div><div style="font-size:11px;color:#5c5c5c;margin-top:4px">Plataforma fiscal para no residentes</div></div>
+  <div class="inv-id"><strong>${id}</strong>Fecha: ${date}<br/>Estado: Pagado <span class="badge">✓ Pagado</span></div>
+</div>
+<div class="parties">
+  <div>
+    <div class="party-label">Emisor</div>
+    <div class="party-name">ResidIA S.L.</div>
+    <div class="party-detail">CIF: ${D.company.cif}<br/>${D.company.addr}<br/>${D.company.email}</div>
+  </div>
+  <div>
+    <div class="party-label">Cliente</div>
+    <div class="party-name">${u.name}</div>
+    <div class="party-detail">${u.nie?'NIE: '+u.nie:'Pasaporte: '+u.passport}<br/>${u.addr}<br/>${u.country}<br/>${u.zone} · IRNR ${u.rate}%</div>
+  </div>
+</div>
+<table>
+  <thead><tr><th>Concepto</th><th>Cantidad</th><th class="amount-col">Precio unit.</th><th class="amount-col">Importe</th></tr></thead>
+  <tbody>
+    <tr><td>${concept}</td><td>1</td><td class="amount-col">${base.toFixed(2).replace('.',',')} €</td><td class="amount-col">${base.toFixed(2).replace('.',',')} €</td></tr>
+  </tbody>
+</table>
+<div class="totals"><div class="totals-box">
+  <div class="total-row"><span>Base imponible</span><span>${base.toFixed(2).replace('.',',')} €</span></div>
+  <div class="total-row"><span>IVA (21%)</span><span>${iva.toFixed(2).replace('.',',')} €</span></div>
+  <div class="total-row final"><span>Total</span><span>${amount.toFixed(2).replace('.',',')} €</span></div>
+</div></div>
+<div style="background:#f6f5f2;border-radius:8px;padding:14px 18px;margin-bottom:20px;font-size:11px;color:#5c5c5c;line-height:1.7">
+  <strong style="color:#141414">Información de pago</strong><br/>
+  Método: Visa •••• 4821<br/>
+  Fecha de cargo: ${date}<br/>
+  Referencia: ${id}
+</div>
+<div class="footer">
+  ${D.company.name} · CIF ${D.company.cif} · Inscrita en el Registro Mercantil de Málaga<br/>
+  Esta factura ha sido generada automáticamente y es válida sin firma según el RD 1619/2012.
+</div>
+</body></html>`;
+
+  const w = window.open('', '_blank');
+  if(w){w.document.write(invoiceHTML);w.document.close()}
+  else{toast('Permite ventanas emergentes para descargar la factura','w')}
+}
+
+// ═══════════════ MODAL SYSTEM ═══════════════
+function openModal(title, bodyHtml, footHtml){
+  $('modal').innerHTML=`<div class="modal-h"><h2>${title}</h2><button class="modal-close" onclick="closeModal()">✕</button></div><div class="modal-body">${bodyHtml}</div>${footHtml?`<div class="modal-foot">${footHtml}</div>`:''}`;
+  $('modalBg').classList.add('on');
+  document.body.style.overflow='hidden';
+}
+function closeModal(){
+  $('modalBg').classList.remove('on');
+  document.body.style.overflow='';
+}
+
+// ═══════════════ NOTIFICATIONS ═══════════════
+const notifications=[
+  {id:1,ico:'⚠️',bg:'var(--amber)',t:'M210 Tipo 35 — Vence 20 ene 2025',d:'Autoriza la presentación del Apto. Estepona.',time:'Hace 2h',unread:true,action:()=>{go('inmuebles');curPropTab='m210';renderProp()}},
+  {id:2,ico:'📋',bg:'var(--blue)',t:'Checklist incompleto',d:'3 datos pendientes para presentar el M210.',time:'Hace 1d',unread:true,action:()=>{go('inmuebles');curPropTab='check';renderProp()}},
+  {id:3,ico:'📄',bg:'var(--surface2)',t:'IBI 2024 Villa Mijas',d:'Recuerda subir el recibo del IBI.',time:'Hace 3d',unread:false,action:()=>go('documentos')},
+  {id:4,ico:'💳',bg:'var(--green-pale)',t:'Bienvenido a ResidIA',d:'Tu cuenta ha sido creada correctamente.',time:'15 sep 2024',unread:false,action:null}
+];
+function renderNotifs(){
+  const unread=notifications.filter(n=>n.unread).length;
+  $('notifDot').style.display=unread?'block':'none';
+  $('notifPanel').innerHTML=`<div class="notif-panel-h"><span>Notificaciones${unread?` (${unread})`:''}</span>${unread?`<button class="b b-s b-ghost" onclick="markAllRead()" style="font-size:10px">Marcar leídas</button>`:''}</div>${notifications.map((n,i)=>`<div class="notif-item ${n.unread?'unread':''}" onclick="clickNotif(${i})"><div class="notif-ico" style="background:${n.bg}">${n.ico}</div><div style="flex:1;min-width:0"><div style="font-weight:500;margin-bottom:1px">${n.t}</div><div style="color:var(--text3);font-size:11px">${n.d}</div></div><div style="font-size:10px;color:var(--text3);white-space:nowrap;flex-shrink:0">${n.time}</div></div>`).join('')}`;
+}
+function toggleNotifs(){$('notifPanel').classList.toggle('on')}
+function clickNotif(i){notifications[i].unread=false;renderNotifs();$('notifPanel').classList.remove('on');if(notifications[i].action)notifications[i].action()}
+function markAllRead(){notifications.forEach(n=>n.unread=false);renderNotifs()}
+// Close notifs on outside click
+document.addEventListener('click',e=>{if(!e.target.closest('.notif-btn')&&!e.target.closest('.notif-panel'))$('notifPanel').classList.remove('on')});
+
+// ═══════════════ SEARCH ═══════════════
+function handleSearch(q){
+  if(!q.trim()){closeModal();return}
+  q=q.toLowerCase();
+  let results=[];
+  // Search props
+  D.props.forEach(p=>{if((p.name+p.city+p.addr+p.ref).toLowerCase().includes(q))results.push({ico:p.icon,t:p.name,d:p.addr+', '+p.city,action:`curProp=${p.id};go('inmuebles')`})});
+  // Search docs
+  D.docs.forEach(d=>{if((d.n+d.prop+d.tipo).toLowerCase().includes(q))results.push({ico:'📄',t:d.n.replace(/^.{2}/,'').trim(),d:d.prop+' · '+d.f,action:`go('documentos')`})});
+  // Search pages
+  Object.entries(titles).forEach(([k,v])=>{if(v.toLowerCase().includes(q))results.push({ico:'📂',t:v,d:'Ir a sección',action:`go('${k}')`})});
+  if(!results.length)results=[{ico:'🔍',t:'Sin resultados',d:'No se encontraron coincidencias para "'+q+'"',action:null}];
+  const html=results.map(r=>`<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);${r.action?'cursor:pointer':''}" ${r.action?`onclick="closeModal();${r.action}"`:''}>
+    <div style="width:36px;height:36px;border-radius:var(--r);background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">${r.ico}</div>
+    <div><div style="font-size:13px;font-weight:500">${r.t}</div><div style="font-size:11px;color:var(--text3)">${r.d}</div></div>
+  </div>`).join('');
+  openModal('Resultados de búsqueda',html);
+}
+
+// ═══════════════ PROFILE SAVE ═══════════════
+function saveProfile(){
+  // Collect form values
+  const inputs=document.querySelectorAll('#pg-perfil .fi');
+  toast('✅ Perfil guardado correctamente','ok');
+  renderComplRing(); // refresh completion
+}
+
+// ═══════════════ UPLOAD MODAL ═══════════════
+function openUploadModal(){
+  openModal('Subir documento',`
+    <div class="drop-zone" onclick="simulateUpload()" id="dropZone">
+      <div style="font-size:36px;margin-bottom:8px">📎</div>
+      <div style="font-size:13px;font-weight:500;margin-bottom:4px">Arrastra tu archivo aquí</div>
+      <div style="font-size:11px;color:var(--text3)">o haz clic para seleccionar · PDF, JPG, PNG · Máx. 10MB</div>
+    </div>
+    <div class="fg" style="margin-top:1rem">
+      <label class="fl">Inmueble</label>
+      <select class="fi">${D.props.map(p=>`<option>${p.name}</option>`).join('')}</select>
+    </div>
+    <div class="fg">
+      <label class="fl">Tipo de documento</label>
+      <select class="fi"><option>Recibo IBI</option><option>Escritura</option><option>Factura gasto</option><option>Certificado residencia fiscal</option><option>Seguro hogar</option><option>Justificante IBAN</option><option>Otro</option></select>
+    </div>`,
+    `<button class="b" onclick="closeModal()">Cancelar</button><button class="b b-g" onclick="simulateUpload()">Subir documento</button>`
+  );
+}
+function simulateUpload(){
+  closeModal();
+  toast('📎 Documento subido correctamente','ok');
+}
+
+// ═══════════════ ADD PROPERTY MODAL ═══════════════
+function openAddPropModal(){
+  openModal('Añadir inmueble',`
+    <div class="al al-i" style="margin-bottom:1rem">ℹ️ <div>Introduce los datos básicos. Podrás completar el resto desde la ficha del inmueble.</div></div>
+    <div class="f2">
+      <div class="fg"><label class="fl">Nombre / Referencia</label><input class="fi" placeholder="Ej: Apto. Nerja"/></div>
+      <div class="fg"><label class="fl">Tipo</label><select class="fi"><option>Apartamento</option><option>Villa</option><option>Estudio</option><option>Local</option><option>Garaje</option><option>Trastero</option></select></div>
+      <div class="fg"><label class="fl">Ciudad</label><input class="fi" placeholder="Ej: Nerja"/></div>
+      <div class="fg"><label class="fl">Referencia catastral</label><input class="fi" placeholder="20 caracteres"/></div>
+    </div>
+    <div class="fg"><label class="fl">Uso principal</label><select class="fi"><option>Alquiler vacacional</option><option>Uso propio</option><option>Larga estancia</option><option>Mixto</option></select></div>`,
+    `<button class="b" onclick="closeModal()">Cancelar</button><button class="b b-g" onclick="closeModal();toast('Inmueble añadido — completa los datos en la ficha','ok')">Añadir inmueble</button>`
+  );
+}
+
+// ═══════════════ CONTACT ASESOR ═══════════════
+function contactAsesor(){
+  openModal('Contactar asesor',`
+    <div style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--surface2);border-radius:var(--r-lg);margin-bottom:1rem">
+      <div style="width:48px;height:48px;border-radius:50%;background:var(--green-pale);display:flex;align-items:center;justify-content:center;font-size:18px">👨‍💼</div>
+      <div><div style="font-size:14px;font-weight:600">${D.asesor.name}</div><div style="font-size:12px;color:var(--text2)">${D.asesor.role} · ${D.asesor.city}</div></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:1rem">
+      <div class="dr"><span class="dr-l">Email</span><span class="dr-v">${D.company.email}</span></div>
+      <div class="dr"><span class="dr-l">Teléfono</span><span class="dr-v">${D.company.tel}</span></div>
+      <div class="dr" style="border-bottom:none"><span class="dr-l">Horario</span><span class="dr-v">${D.asesor.schedule}</span></div>
+    </div>
+    <div class="fg"><label class="fl">Asunto</label><select class="fi"><option>Consulta sobre M210</option><option>Revisión de datos</option><option>Duda fiscal</option><option>Incidencia</option><option>Otro</option></select></div>
+    <div class="fg"><label class="fl">Mensaje</label><textarea class="fi" rows="4" placeholder="Escribe tu consulta..." style="resize:vertical"></textarea></div>`,
+    `<button class="b" onclick="closeModal()">Cancelar</button><button class="b b-g" onclick="closeModal();toast('📩 Mensaje enviado a tu asesor','ok')">Enviar mensaje</button>`
+  );
+}
+
+// ═══════════════ VER BORRADOR M210 ═══════════════
+function verBorrador(propIdx, declIdx){
+  const p=D.props[propIdx||curProp];
+  const d=p.decl[declIdx||0];
+  const u=D.user;
+  openModal('Borrador M210 · '+d.tipo+' · '+p.name,`
+    <div class="al al-i" style="margin-bottom:1rem">ℹ️ <div>Este es un <b>borrador</b> generado por ResidIA. La versión final se presenta ante la AEAT tras tu autorización.</div></div>
+    <div style="background:var(--surface2);border-radius:var(--r-lg);padding:1.25rem;font-size:12px;font-family:monospace;line-height:2">
+      <div style="font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Modelo 210 — IRNR · Ejercicio ${d.year}</div>
+      <div class="dr"><span class="dr-l">Casilla 01 · NIF declarante</span><span class="dr-v">${u.nie||'⚠️ Pendiente'}</span></div>
+      <div class="dr"><span class="dr-l">Casilla 03 · Apellidos y nombre</span><span class="dr-v">${u.name}</span></div>
+      <div class="dr"><span class="dr-l">Casilla 06 · País residencia</span><span class="dr-v">${u.country}</span></div>
+      <div class="dr"><span class="dr-l">Casilla 14 · Tipo gravamen</span><span class="dr-v">${u.rate}%</span></div>
+      <div class="hr"></div>
+      <div class="dr"><span class="dr-l">Casilla 20 · Tipo renta</span><span class="dr-v">${d.tipo==='T35'?'35 — Rendimientos inmuebles arrendados':'02 — Rentas imputadas inmuebles urbanos'}</span></div>
+      <div class="dr"><span class="dr-l">Casilla 23 · Periodo</span><span class="dr-v">01/01/${d.year} – 31/12/${d.year}</span></div>
+      <div class="dr"><span class="dr-l">Casilla 50 · Ref. catastral</span><span class="dr-v">${p.ref}</span></div>
+      ${d.base?`<div class="dr"><span class="dr-l">Casilla 07 · Base imponible</span><span class="dr-v">${fmt(d.base)} €</span></div>`:''}
+      <div class="dr"><span class="dr-l">Casilla 09 · Cuota íntegra</span><span class="dr-v" style="color:var(--red-text);font-size:14px">${fmt(d.cuota)} €</span></div>
+      <div class="hr"></div>
+      <div class="dr" style="border-bottom:none"><span class="dr-l">Plazo presentación</span><span class="dr-v">${d.plazo}</span></div>
+    </div>`,
+    `<button class="b" onclick="closeModal()">Cerrar</button><button class="b b-g" onclick="closeModal();toast('📥 Borrador descargado','ok')">📥 Descargar PDF</button>`
+  );
+}
+
+// ═══════════════ COMPLETION RING ═══════════════
+function renderComplRing(){
+  // Calculate overall profile/data completion
+  let total=0, ok=0;
+  D.props.forEach(p=>{
+    if(p.checklist.declarante){total+=p.checklist.declarante.total;ok+=p.checklist.declarante.ok}
+    if(p.checklist.docs){total+=p.checklist.docs.total;ok+=p.checklist.docs.ok}
+  });
+  // Add NIE check
+  total++;if(D.user.nie)ok++;
+  const pct=Math.round(ok/total*100);
+  const circ=2*Math.PI*15; // r=15
+  const offset=circ*(1-pct/100);
+  const color=pct>=90?'var(--green-mid)':pct>=60?'var(--amber-text)':'var(--red-mid)';
+  $('complRing').innerHTML=`<svg width="36" height="36" viewBox="0 0 36 36"><circle class="bg" cx="18" cy="18" r="15"/><circle class="fg" cx="18" cy="18" r="15" stroke="${color}" stroke-dasharray="${circ}" stroke-dashoffset="${offset}"/></svg><div class="txt" style="color:${color}">${pct}%</div>`;
+  $('complRing').title=`Perfil completado: ${pct}% (${ok}/${total})`;
+}
+
+// ═══════════════ AUTH SYSTEM ═══════════════
+let authMethod=null; // 'cert' | 'clave' | 'password'
+const DEMO_NIE='X1234567A'; // default NIE for demo
+
+function showLoginForm(){
+  $('loginFormToggle').style.display='none';
+  $('loginForm').classList.add('visible');
+  $('loginNie').focus();
+}
+function hideLoginForm(){
+  $('loginFormToggle').style.display='flex';
+  $('loginForm').classList.remove('visible');
+  $('loginError').classList.remove('show');
+}
+
+function loginCert(){
+  // Simulate certificate reading with a brief delay
+  const lw=$('loginWrap');
+  lw.innerHTML=`<div class="login" style="text-align:center">
+    <div style="font-size:48px;margin-bottom:16px">🔐</div>
+    <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:500;margin-bottom:8px">Leyendo certificado digital...</div>
+    <div style="font-size:13px;color:var(--text2)">Selecciona tu certificado en el diálogo del navegador</div>
+    <div style="margin-top:20px;width:200px;height:4px;background:var(--surface2);border-radius:2px;margin-left:auto;margin-right:auto;overflow:hidden">
+      <div style="height:100%;width:0%;background:var(--green-mid);border-radius:2px;animation:loadBar 2s var(--ease) forwards"></div>
+    </div>
+    <style>@keyframes loadBar{to{width:100%}}</style>
+  </div>`;
+  setTimeout(()=>completeLogin('cert'),2200);
+}
+
+function loginClave(){
+  const lw=$('loginWrap');
+  lw.innerHTML=`<div class="login" style="text-align:center">
+    <div style="font-size:48px;margin-bottom:16px">🏛️</div>
+    <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:500;margin-bottom:8px">Redirigiendo a Cl@ve...</div>
+    <div style="font-size:13px;color:var(--text2)">Conectando con el sistema de identificación de la Administración</div>
+    <div style="margin-top:20px;width:200px;height:4px;background:var(--surface2);border-radius:2px;margin-left:auto;margin-right:auto;overflow:hidden">
+      <div style="height:100%;width:0%;background:var(--blue-text);border-radius:2px;animation:loadBar 2.5s var(--ease) forwards"></div>
+    </div>
+  </div>`;
+  setTimeout(()=>completeLogin('clave'),2800);
+}
+
+function loginPassword(){
+  const nie=$('loginNie').value.trim().toUpperCase();
+  const pass=$('loginPass').value.trim().toUpperCase();
+  // Default: NIE is both user and password
+  if(!nie){$('loginError').textContent='⛔ Introduce tu NIE.';$('loginError').classList.add('show');return}
+  // Accept the demo NIE or any valid-looking NIE format
+  const validFormat=/^[XYZ]\d{7}[A-Z]$/.test(nie);
+  if(!validFormat){
+    $('loginError').textContent='⛔ Formato de NIE incorrecto. El NIE debe tener formato X0000000A (letra + 7 dígitos + letra).';
+    $('loginError').classList.add('show');
+    return;
+  }
+  // Check password (default = same NIE)
+  if(pass!==nie && pass!==''){
+    $('loginError').textContent='⛔ Contraseña incorrecta. Recuerda: por defecto tu contraseña es tu propio NIE.';
+    $('loginError').classList.add('show');
+    return;
+  }
+  // Accept empty password with NIE as default
+  if(!pass || pass===nie){
+    // Update user NIE in the data model
+    D.user.nie=nie;
+    completeLogin('password');
+  }
+}
+
+function completeLogin(method){
+  authMethod=method;
+  $('loginWrap').classList.add('hidden');
+
+  // Update session tag in topbar
+  const labels={cert:'Certificado digital',clave:'Cl@ve',password:'NIE + Contraseña'};
+  const classes={cert:'session-cert',clave:'session-clave',password:'session-pass'};
+  const icons={cert:'🔐',clave:'🏛️',password:'👤'};
+  const tag=$('sessionTag');
+  tag.style.display='flex';
+  tag.innerHTML=`<div class="session-tag ${classes[method]}" onclick="showSessionInfo()">${icons[method]} ${labels[method]}</div>`;
+
+  // If cert or clave, user has AEAT presentation capability
+  if(method==='cert' || method==='clave'){
+    D.user.aeatAccess=true;
+  } else {
+    D.user.aeatAccess=false;
+  }
+
+  // Re-render everything with updated auth state
+  renderResumen();renderComplRing();renderNotifs();renderSbFoot();renderPerfilAsesor();
+  toast('Sesión iniciada'+(method==='cert'?' con certificado digital':method==='clave'?' vía Cl@ve':''),'ok');
+}
+
+function showSessionInfo(){
+  const labels={cert:'Certificado digital FNMT',clave:'Cl@ve PIN',password:'NIE + Contraseña'};
+  const access=authMethod==='cert'||authMethod==='clave';
+  openModal('Sesión activa',`
+    <div style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--surface2);border-radius:var(--r-lg);margin-bottom:1rem">
+      <div style="font-size:24px">${authMethod==='cert'?'🔐':authMethod==='clave'?'🏛️':'👤'}</div>
+      <div><div style="font-size:14px;font-weight:600">${D.user.name}</div><div style="font-size:12px;color:var(--text2)">${labels[authMethod]}</div></div>
+    </div>
+    <div class="dr"><span class="dr-l">NIE</span><span class="dr-v">${D.user.nie||'No registrado'}</span></div>
+    <div class="dr"><span class="dr-l">País</span><span class="dr-v">${D.user.country} · ${D.user.zone}</span></div>
+    <div class="dr"><span class="dr-l">Tipo IRNR</span><span class="dr-v">${D.user.rate}%</span></div>
+    <div class="dr" style="border-bottom:none"><span class="dr-l">Presentación AEAT</span><span class="dr-v" style="color:${access?'var(--green-mid)':'var(--amber-text)'}">${access?'✅ Habilitada':'⚠️ Requiere certificado o Cl@ve'}</span></div>`,
+    `<button class="b" onclick="closeModal()">Cerrar</button><button class="b" style="color:var(--red-text)" onclick="closeModal();logout()">⏻ Cerrar sesión</button>`
+  );
+}
+
+function logout(){
+  authMethod=null;
+  D.user.aeatAccess=false;
+  $('sessionTag').style.display='none';
+  // Rebuild login screen
+  location.reload();
+}
+
+function quickRegister(){
+  openModal('Crear cuenta en ResidIA',`
+    <div style="text-align:center;margin-bottom:1.25rem"><div style="font-size:36px;margin-bottom:8px">🏠</div><div style="font-size:13px;color:var(--text2)">Registra tu cuenta en 2 minutos. Solo necesitas tu NIE y un email.</div></div>
+    <div class="f2">
+      <div class="fg"><label class="fl">Nombre completo</label><input class="fi" placeholder="Johan Henriksson"/></div>
+      <div class="fg"><label class="fl">NIE español</label><input class="fi" placeholder="X1234567A"/></div>
+      <div class="fg"><label class="fl">Email</label><input class="fi" type="email" placeholder="tu@email.com"/></div>
+      <div class="fg"><label class="fl">País de residencia</label><select class="fi"><option>Suecia</option><option>Alemania</option><option>Francia</option><option>Reino Unido</option><option>Otro UE</option><option>Fuera UE</option></select></div>
+    </div>
+    <div style="font-size:10px;color:var(--text3);margin-top:4px;line-height:1.5">Al crear tu cuenta aceptas los <a href="#" style="color:var(--green-mid)">términos de servicio</a> y la <a href="#" style="color:var(--green-mid)">política de privacidad</a> de ResidIA. Tus datos están protegidos conforme al RGPD.</div>`,
+    `<button class="b" onclick="closeModal()">Cancelar</button><button class="b b-g" onclick="closeModal();toast('✅ Cuenta creada — revisa tu email para confirmar','ok')">Crear cuenta</button>`
+  );
+}
+
+// Allow Enter key in login form
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter' && $('loginForm').classList.contains('visible')){
+    loginPassword();
+  }
+});
+
+// ═══════════════ SIDEBAR FOOTER (data-driven) ═══════════════
+function renderSbFoot(){
+  const isPro=D.account.plan==='annual'||dev;
+  $('sbFoot').innerHTML=`${D.company.name} · ${D.asesor.name}
+    <div id="sbPlanBox" style="background:${isPro?'#111':'var(--green-pale)'};border-radius:var(--r);padding:8px 11px;margin-top:.6rem">
+      <div style="font-size:11px;font-weight:500;color:${isPro?'#4ade80':'var(--green)'}">${isPro?'Plan anual'+(dev?' (dev)':''):'Plan gratuito'}</div>
+      <div style="font-size:10px;color:var(--green-text)">${D.props.length} inmuebles · ${isPro?'Todo desbloqueado':'Dashboard fiscal'}</div>
+    </div>
+    ${!isPro?`<div class="dev-hide" style="background:var(--amber);border-radius:var(--r);padding:8px 11px;margin-top:4px;cursor:pointer" onclick="go('plan')"><div style="font-size:11px;font-weight:500;color:var(--amber-dk)">Desbloquear todo →</div><div style="font-size:10px;color:var(--amber-text)">50 €/inmueble/año</div></div>`:''}`;
+}
+
+// ═══════════════ PERFIL ASESOR (data-driven) ═══════════════
+function renderPerfilAsesor(){
+  const el=$('perfilAsesor');
+  if(el) el.innerHTML=`<b style="color:var(--text)">${D.company.name}</b> actúa como representante ante la AEAT.<br/>Asesor: ${D.asesor.name}<br/><span style="color:var(--text3)">${D.company.email} · ${D.company.tel}</span>`;
+}
+
+// ═══════════════ CONTRATAR PLAN ═══════════════
+function contratarPlan(){
+  openModal('Contratar plan anual',`
+    <div class="al al-ok" style="margin-bottom:1rem">✅ <div><b>Resumen de tu suscripción</b>Revisa los datos antes de confirmar.</div></div>
+    <div class="dr"><span class="dr-l">Plan</span><span class="dr-v">Anual · ${D.props.length} inmuebles</span></div>
+    <div class="dr"><span class="dr-l">Precio</span><span class="dr-v">${D.props.length*50} €/año</span></div>
+    <div class="dr"><span class="dr-l">Presentación M210</span><span class="dr-v">+5 €/modelo al presentar</span></div>
+    <div class="dr" style="border-bottom:none"><span class="dr-l">Cancelación</span><span class="dr-v">Sin permanencia</span></div>
+    <div class="hr"></div>
+    <div class="fg"><label class="fl">Tarjeta de pago</label><input class="fi" placeholder="1234 5678 9012 3456"/></div>
+    <div class="f2">
+      <div class="fg"><label class="fl">Caducidad</label><input class="fi" placeholder="MM/AA"/></div>
+      <div class="fg"><label class="fl">CVV</label><input class="fi" placeholder="123" type="password"/></div>
+    </div>
+    <div style="font-size:10px;color:var(--text3);display:flex;align-items:center;gap:4px;margin-top:4px"><span style="color:var(--green-mid)">🔒</span> Pago seguro mediante Stripe · Tus datos bancarios están cifrados</div>`,
+    `<button class="b" onclick="closeModal()">Cancelar</button><button class="b b-g" onclick="closeModal();toast('✅ Plan anual activado correctamente','ok')">Confirmar y pagar ${D.props.length*50} €</button>`
+  );
+}
+
+// ═══════════════ EDITAR INMUEBLE ═══════════════
+function editarInmueble(){
+  const p=D.props[curProp];
+  openModal('Editar · '+p.name,`
+    <div class="f2">
+      <div class="fg"><label class="fl">Nombre</label><input class="fi" value="${p.name}"/></div>
+      <div class="fg"><label class="fl">Tipo</label><select class="fi"><option ${p.type==='Apartamento'?'selected':''}>Apartamento</option><option ${p.type==='Villa'?'selected':''}>Villa</option><option>Estudio</option><option>Local</option></select></div>
+      <div class="fg"><label class="fl">Ciudad</label><input class="fi" value="${p.city}"/></div>
+      <div class="fg"><label class="fl">Dirección</label><input class="fi" value="${p.addr}"/></div>
+      <div class="fg"><label class="fl">Ref. catastral</label><input class="fi" value="${p.ref}"/></div>
+      <div class="fg"><label class="fl">% propiedad</label><input class="fi" type="number" value="${p.pct}"/></div>
+      <div class="fg"><label class="fl">Valor catastral (€)</label><input class="fi" type="number" value="${p.vc}"/></div>
+      <div class="fg"><label class="fl">Uso</label><select class="fi"><option ${p.uso.includes('vacacional')?'selected':''}>Alquiler vacacional</option><option ${p.uso==='Uso propio'?'selected':''}>Uso propio</option><option>Larga estancia</option><option>Mixto</option></select></div>
+    </div>`,
+    `<button class="b" onclick="closeModal()">Cancelar</button><button class="b b-g" onclick="closeModal();toast('✅ Inmueble actualizado','ok');renderProp()">Guardar cambios</button>`
+  );
+}
+
+// ═══════════════ CAMBIAR MÉTODO DE PAGO ═══════════════
+function cambiarMetodoPago(){
+  openModal('Cambiar método de pago',`
+    <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface2);border-radius:var(--r);margin-bottom:1rem">
+      <div style="width:42px;height:28px;background:linear-gradient(135deg,#1a1f71,#2e77bc);border-radius:4px;display:flex;align-items:center;justify-content:center;color:white;font-size:9px;font-weight:700">VISA</div>
+      <div><div style="font-size:12px;font-weight:500">•••• 4821</div><div style="font-size:10px;color:var(--text3)">Método actual</div></div>
+    </div>
+    <div class="fg"><label class="fl">Nuevo número de tarjeta</label><input class="fi" placeholder="1234 5678 9012 3456"/></div>
+    <div class="f2">
+      <div class="fg"><label class="fl">Caducidad</label><input class="fi" placeholder="MM/AA"/></div>
+      <div class="fg"><label class="fl">CVV</label><input class="fi" placeholder="123" type="password"/></div>
+    </div>
+    <div class="fg"><label class="fl">Titular</label><input class="fi" value="${D.user.name}"/></div>`,
+    `<button class="b" onclick="closeModal()">Cancelar</button><button class="b b-g" onclick="closeModal();toast('✅ Método de pago actualizado','ok')">Guardar tarjeta</button>`
+  );
+}
+
+// ═══════════════ CAMBIAR EMAIL FACTURACIÓN ═══════════════
+function cambiarEmailFact(){
+  openModal('Email de facturación',`
+    <div class="fg"><label class="fl">Email actual</label><input class="fi" value="${D.company.email}" disabled style="opacity:.6"/></div>
+    <div class="fg"><label class="fl">Nuevo email</label><input class="fi" placeholder="tu@email.com" type="email"/></div>`,
+    `<button class="b" onclick="closeModal()">Cancelar</button><button class="b b-g" onclick="closeModal();toast('✅ Email actualizado','ok')">Guardar</button>`
+  );
+}
+
+// ═══════════════ PAUSAR / CANCELAR PLAN ═══════════════
+function pausarPlan(){
+  openModal('Pausar suscripción',`
+    <div class="al al-w" style="margin-bottom:1rem">⚠️ <div><b>Al pausar tu plan:</b>Se mantendrán tus datos e inmuebles, pero no podrás acceder a actividad económica ni se presentarán M210 hasta que reactives.</div></div>
+    <div class="fg"><label class="fl">Motivo (opcional)</label><select class="fi"><option>Temporalmente no alquilo</option><option>Quiero evaluar otras opciones</option><option>Motivos económicos</option><option>Otro</option></select></div>`,
+    `<button class="b" onclick="closeModal()">Volver</button><button class="b" style="color:var(--red-text);border-color:var(--red)" onclick="closeModal();toast('⏸️ Suscripción pausada','w')">Confirmar pausa</button>`
+  );
+}
+function cancelarPlan(){
+  openModal('Cancelar plan',`
+    <div class="al al-w" style="margin-bottom:1rem">⚠️ <div><b>¿Estás seguro?</b>Perderás acceso a actividad económica y presentación M210. Tus datos e inmuebles se conservarán 90 días.</div></div>
+    <div class="fg"><label class="fl">Para confirmar, escribe CANCELAR</label><input class="fi" id="cancelConfirm" placeholder="CANCELAR"/></div>`,
+    `<button class="b" onclick="closeModal()">Volver</button><button class="b" style="color:var(--red-text);border-color:var(--red)" onclick="if($('cancelConfirm').value==='CANCELAR'){closeModal();toast('Plan cancelado','w')}else{toast('Escribe CANCELAR para confirmar','w')}">Cancelar plan</button>`
+  );
+}
+
+// ═══════════════ NUEVA RESERVA ═══════════════
+function nuevaReserva(){
+  openModal('Nueva reserva',`
+    <div class="f2">
+      <div class="fg"><label class="fl">Inmueble</label><select class="fi">${D.props.filter(p=>p.diasAlq>0).map(p=>`<option>${p.name}</option>`).join('')}</select></div>
+      <div class="fg"><label class="fl">Canal</label><select class="fi"><option>Directo</option><option>Booking</option><option>Airbnb</option></select></div>
+      <div class="fg"><label class="fl">Huésped</label><input class="fi" placeholder="Nombre completo"/></div>
+      <div class="fg"><label class="fl">Doc. identidad</label><input class="fi" placeholder="Pasaporte / NIF"/></div>
+      <div class="fg"><label class="fl">Check-in</label><input class="fi" type="date"/></div>
+      <div class="fg"><label class="fl">Check-out</label><input class="fi" type="date"/></div>
+      <div class="fg"><label class="fl">Precio/noche (€)</label><input class="fi" type="number" placeholder="130"/></div>
+      <div class="fg"><label class="fl">Tipo arrendatario</label><select class="fi"><option value="particular_ext">Particular no residente</option><option value="particular_es">Particular residente España</option><option value="empresa_es">Empresa española</option></select></div>
+    </div>`,
+    `<button class="b" onclick="closeModal()">Cancelar</button><button class="b b-g" onclick="closeModal();toast('✅ Reserva creada','ok')">Crear reserva</button>`
+  );
+}
+
+// ═══════════════ INIT ═══════════════
+renderResumen();renderFiscal();renderDocs();renderActPricing();renderIngresos();renderCal();renderGastos();renderPlan();renderNotifs();renderComplRing();renderSbFoot();renderPerfilAsesor();
+$$('.sb-btn').forEach(b=>b.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();b.click()}}));
+</script>
+</body>
+</html>
